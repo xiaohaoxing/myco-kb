@@ -20,7 +20,9 @@
   ],
   "scripts": {
     "test": "node --test",
-    "check": "node --check bin/myco.js && node --check lib/index.js && node --check lib/tools.js && node --check lib/daemon.js && node --check lib/client.js && node --check lib/core/*.js"
+    "test:host": "node scripts/host-check.mjs",
+    "check": "node --check bin/myco.js && node --check lib/index.js && node --check lib/remote.js && node --check lib/tools.js && node --check lib/daemon.js && node --check lib/client.js && node --check lib/core/*.js",
+    "links": "bash scripts/dev-links.sh"
   },
   "dsh": {
     "client": {
@@ -35,7 +37,13 @@
   },
   "peerDependencies": {
     "@deepseek-ai/cordis": "^4.0.1",
-    "@deepseek-ai/dsh-tools": "^0.1.0-rc.6"
+    "@deepseek-ai/dsh-tools": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-typert-protocol": "^0.1.0-rc.6"
+  },
+  "devDependencies": {
+    "@deepseek-ai/cordis": "^4.0.1",
+    "@deepseek-ai/dsh-tools": "^0.1.0-rc.6",
+    "@deepseek-ai/dsh-typert-protocol": "^0.1.0-rc.6"
   },
   "engines": {
     "node": ">=18"
