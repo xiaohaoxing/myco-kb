@@ -22,21 +22,24 @@ fi
 mkdir -p "$PROFILE/node_modules/@dsh"
 ln -sfn "$REPO" "$PROFILE/node_modules/@dsh/myco-kb"
 
-# 2. 在 profile package.json 声明依赖（幂等）
+# 2. 在 profile package.json 声明依赖（幂等；用 python3 改 JSON，node 26 已不支持 `node -` stdin）
 if [ -f "$PROFILE/package.json" ]; then
-  node - "$PROFILE/package.json" "$NAME" <<'NODE'
-const [pkgPath, name] = process.argv.slice(1)
-const fs = require('fs')
-const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'))
-const deps = (pkg.dependencies ??= {})
-if (deps[name] !== 'file:./node_modules/@dsh/myco-kb') {
-  deps[name] = 'file:./node_modules/@dsh/myco-kb'
-  fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n')
-  console.log(`已在 ${pkgPath} 声明依赖 ${name}`)
-} else {
-  console.log(`${name} 已在 package.json 中，跳过`)
-}
-NODE
+  python3 - "$PROFILE/package.json" "$NAME" <<'PYJSON'
+import json, sys
+pkg_path, name = sys.argv[1], sys.argv[2]
+with open(pkg_path, encoding='utf8') as f:
+    pkg = json.load(f)
+deps = pkg.setdefault('dependencies', {})
+value = 'file:./node_modules/@dsh/myco-kb'
+if deps.get(name) != value:
+    deps[name] = value
+    with open(pkg_path, 'w', encoding='utf8') as f:
+        json.dump(pkg, f, ensure_ascii=False, indent=2)
+        f.write('\n')
+    print(f'已在 {pkg_path} 声明依赖 {name}')
+else:
+    print(f'{name} 已在 package.json 中，跳过')
+PYJSON
 else
   echo "警告：profile 没有 package.json，已跳过依赖声明（请手动添加 ${NAME} 依赖）" >&2
 fi

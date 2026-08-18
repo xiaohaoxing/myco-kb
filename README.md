@@ -67,15 +67,19 @@ npm run test:host # 宿主平面验证（真实 Cordis：服务/工具/daemon/re
 `test:host` 必须用独立进程跑（`node scripts/host-check.mjs`），**不能用 `node --test`**：
 Cordis 纤维在 node:test 的 async context 下不会 apply（已实测确认的环境不兼容）。
 
-### 安装进 Harness（静默常驻）
+### 安装进 Harness（静默常驻）—— 已执行（2026-08-19）
 
 ```bash
-scripts/install-profile.sh   # 符号链接进 ~/.dsh/profiles/web + 声明依赖
-# 然后重启 Harness；插件管理页 Plugins 设置区出现 MyCo-KB 控制台 tab
+scripts/install-profile.sh   # 符号链接进 ~/.dsh/profiles/web + 声明依赖（幂等）
 ```
 
-安装脚本会修改运行中 Harness 的 profile，建议操作前备份
-`~/.dsh/profiles/web/package.json`，并在重启后生效。
+已完成的三步（备份在 `~/.dsh/profiles/web/*.bak-20260819-*`）：
+1. `install-profile.sh`：`node_modules/@dsh/myco-kb` → 本仓库符号链接 + package.json 声明依赖
+2. `myco mount` 两个试点知识包（超合体数据工厂 + MyCo-KB）写入 `~/.myco/config.json`（插件启动自动读取）
+3. `cordis.patch.yml` 追加 insert 补丁启用 `@dsh/myco-kb`（config: maintenanceIntervalHours 6）
+
+**重启 Harness 后生效**：插件管理页 Plugins 设置区出现 MyCo-KB 控制台 tab；
+daemon 静默监听两个知识包，变更自动增量索引。
 
 ## 已知边界（实测结论）
 
