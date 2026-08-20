@@ -56,4 +56,13 @@ scripts/install-profile.sh   # 安装进 ~/.dsh/profiles/web（重启 Harness �
 
 ## 路线
 
-v0.1 CLI ✅ → v0.2 控制台 tab + 远程服务 + daemon 宿主化 ✅ → v0.3 云端 git 同步 + 远程库管理（cloudStatus 数据面已就绪）→ v0.4 按任务动态装配 profile/工具。
+v0.1 CLI ✅ → v0.2 控制台 tab + 远程服务 + daemon 宿主化 ✅ → v0.3 云端 git 同步 + 远程库管理（cloudStatus 数据面已就绪）→ v0.4 按任务动态装配 profile/工具 → **v0.5 知识更新流（染色/传播）**。
+
+## v0.5 知识更新流（设计已定稿，ADR-010 技术栈已确认）
+
+- **变更源双轨**：git 化包用 `git diff`（commit=版本、tag=语义化版本）；本地全局（Obsidian iCloud）用内容 hash 对比 → 统一变更事件 `{ nodeId, kind, before, after, bump }`
+- **存储分层**：文件为唯一事实源；`node:sqlite`（内置，零依赖）做增量缓存/持久状态——`events`（append-only 事件日志）/ `graph`（nodes/edges 缓存，可重建）/ `state`（stale/版本）/ `queue`（传播队列）
+- **契约块**：Obsidian callout 语法 `> [!myco-contract] id vN` + 内容；引用方 `[[页#contract-id]]` 为强引用（传播边），普通 `[[链接]]` 为弱引用
+- **影响分析**：`impact` 组件——反向派生链（染色）+ 跨包引用与 kb.yaml 依赖（传播）；内存 BFS，大数据量回退 SQLite 递归 CTE
+- **传播执行分层**：自动重派生 → dsh-jobs 后台任务；下游语义更新 → **subagent 方式调度**（agent 起草，人确认）；飞书通知由插件配置 `feishu.webhook` 启用；所有传播任务控制台人工确认收口
+- **状态机**：新增 `stale`；常青页 = 事件流物化视图（重投影），证据层只追加变更事件
