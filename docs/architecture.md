@@ -64,7 +64,7 @@ scripts/install-profile.sh   # 安装进 ~/.dsh/profiles/web（重启 Harness �
 
 ## 路线
 
-v0.1 CLI ✅ → v0.2 控制台 tab + 远程服务 + daemon 宿主化 ✅ → **v0.3 云端 git 同步 ✅** → v0.4 按任务动态装配 profile/工具 → **v0.5 知识更新流（染色/传播）数据层 ✅**（契约解析 / 变更检测 / 影响分析 / stale 队列，全链路实测）→ v0.5.1 控制台染色/传播视图 + subagent 调度。
+v0.1 CLI ✅ → v0.2 控制台 tab + 远程服务 + daemon 宿主化 ✅ → **v0.3 云端 git 同步 ✅** → v0.4 按任务动态装配 profile/工具 → **v0.5 知识更新流（染色/传播）数据层 ✅**（契约解析 / 变更检测 / 影响分析 / stale 队列，全链路实测）→ v0.5.1 控制台染色/传播视图 ✅（变更事件区 + 传播队列区 + 影响分析动作 + 契约清单 API）→ subagent 调度 + webhook。
 
 ## v0.3 云端 git 同步（已完成）
 

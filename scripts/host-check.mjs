@@ -65,6 +65,39 @@ async function verifyHostPlane() {
   // 控制台 JSON API 路由已注册（/myco/api，client fetch 通道）
   assert.ok(webServerRoutes.some((r) => r.kind === 'prefix' && r.path === '/myco/api'), '应注册 /myco/api 路由')
 
+  // HTTP 层实测：调用 handler 验证 JSON 响应（status / events / stale / contracts）
+  const route = webServerRoutes.find((r) => r.path === '/myco/api')
+  const call = async (url, method = 'GET', body = null) => {
+    let status = 0
+    let payload = ''
+    const req = {
+      method,
+      url,
+      on() {},
+      ...(body !== null ? { body } : {}),
+    }
+    const res = {
+      writeHead(code) { status = code },
+      end(b) { payload = b },
+    }
+    await route.handler(req, res)
+    return { status, payload: payload ? JSON.parse(payload) : null }
+  }
+  const st = await call('/myco/api/status')
+  assert.equal(st.status, 200)
+  assert.ok(st.payload.counts.packages >= 1)
+  const evs = await call('/myco/api/events?n=5')
+  assert.equal(evs.status, 200)
+  assert.ok(Array.isArray(evs.payload))
+  const stl = await call('/myco/api/stale')
+  assert.equal(stl.status, 200)
+  assert.ok(Array.isArray(stl.payload))
+  const cts = await call('/myco/api/contracts')
+  assert.equal(cts.status, 200)
+  assert.ok(Array.isArray(cts.payload))
+  const nf = await call('/myco/api/nothing')
+  assert.equal(nf.status, 404)
+
   // daemon 启动时已完成索引，status 反映挂载的知识包
   const status = await myco.status()
   assert.equal(status.counts.packages, 1)
