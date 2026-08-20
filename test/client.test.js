@@ -36,7 +36,8 @@ async function loadClientBundle() {
 test('button 工具函数的 children 用参数 label（防 text/label 类未定义引用回归）', async () => {
   const fs = await import('node:fs')
   const code = fs.readFileSync(new URL('../lib/client.js', import.meta.url), 'utf8')
-  const btn = code.slice(code.indexOf('function button'), code.indexOf('function sectionTitle'))
+  const btnStart = code.indexOf('function button')
+  const btn = code.slice(btnStart, btnStart + 300)
   assert.ok(btn.includes('}, label)'), `button children 应为 label 参数，实际片段: ${btn.slice(-60)}`)
   assert.ok(!btn.includes('}, text)'), 'button children 不应引用未定义变量 text')
 })
