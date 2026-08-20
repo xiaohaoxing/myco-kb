@@ -22,6 +22,7 @@
 2. **client 插件不要在顶层 inject 里硬等动态 remote namespace**（`remote.myco`）：会让整个 web boot 卡在插件激活阶段（`pending (waiting for service: remote.myco)`）。remote 面是「面板打开后可用则用，不可用则等待」的懒依赖，不是「web 启动必须已有」的硬依赖。
 3. **回归测试模式**：`test/client.test.js` mock `window.__ModuleLoader__` 真加载 bundle，断言顶层 inject 不含 `remote.myco`——防止以后重构把硬依赖加回去。
 4. **slot 注册必须带 `label`**：`settings.plugins.tab` 渲染时 `resolveSlotLabel(entry.options.label) ?? ""`——缺 label 的 entry 标题为空，tab 直接不显示（2026-08-20 实测：client bundle 已装载、管理页正常，唯独 tab 不出现）。同时 label 回调里用到的 t 要在 apply 里先 `ctx.locale.bind(NS)`。
+5. **设置页/非会话 UI 不要依赖 Typert remote face**：`remote.<name>` 在 client 端受 inject 声明门控，且第三方插件的宿主 face 不随 web boot 同步——设置页这类非会话 UI 永远拿不到（2026-08-20 实测：tab 出现但永远"执行中"）。控制台数据改用 `ctx.webServer.register` 注册同源 JSON 路由（官方 dsh-client-modules 同款机制），client fetch 即可用。Typert remote 保留给 agent 工具面与会话级场景。
 
 ## 数据模型
 

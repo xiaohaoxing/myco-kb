@@ -31,7 +31,14 @@ async function verifyHostPlane() {
   const app = new Context()
 
   const registeredTools = []
+  const webServerRoutes = []
   app.provide('tools', { register(entry) { registeredTools.push(entry) } })
+  app.provide('webServer', {
+    register(route) {
+      webServerRoutes.push(route)
+      return () => {}
+    },
+  })
 
   const pluginFiber = app.plugin(plugin, {
     dataDir,
@@ -54,6 +61,9 @@ async function verifyHostPlane() {
   // agent 工具注册 4 个
   assert.equal(registeredTools.length, 4)
   assert.deepEqual(registeredTools.map((t) => t.name).sort(), ['myco_find', 'myco_index', 'myco_status', 'myco_sweep'])
+
+  // 控制台 JSON API 路由已注册（/myco/api，client fetch 通道）
+  assert.ok(webServerRoutes.some((r) => r.kind === 'prefix' && r.path === '/myco/api'), '应注册 /myco/api 路由')
 
   // daemon 启动时已完成索引，status 反映挂载的知识包
   const status = await myco.status()
@@ -81,7 +91,7 @@ async function verifyHostPlane() {
   if (typeof pluginFiber?.dispose === 'function') await pluginFiber.dispose()
   app.fiber.dispose?.()
 
-  console.log('✅ 宿主平面验证通过：ctx.myco 服务 / 12 个 Remote 方法 / 4 个工具 / daemon 索引 / 检索 / 挂载 / cloud 注册')
+  console.log('✅ 宿主平面验证通过：ctx.myco / 12 Remote 方法 / 4 工具 / daemon / 检索 / 挂载 / cloud / myco API 路由')
 }
 
 verifyHostPlane().then(
