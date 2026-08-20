@@ -49,7 +49,7 @@ async function verifyHostPlane() {
 
   // Remote 方法标记完整（Typert Gateway 可发现）
   const names = remoteMethods(myco).map((m) => m.method).sort()
-  assert.deepEqual(names, ['cloudStatus', 'find', 'index', 'mounts', 'profiles', 'status', 'sweep', 'useProfile'])
+  assert.deepEqual(names, ['cloudAdd', 'cloudList', 'cloudRemove', 'cloudStatus', 'cloudSync', 'find', 'index', 'mounts', 'profiles', 'status', 'sweep', 'useProfile'])
 
   // agent 工具注册 4 个
   assert.equal(registeredTools.length, 4)
@@ -66,18 +66,22 @@ async function verifyHostPlane() {
   assert.ok(hits.length >= 1)
   assert.ok(hits.some((h) => h.rel === 'a.md'))
 
-  // 挂载读取 + cloudStatus
+  // 挂载读取 + cloudStatus + cloud 注册/移除（无需真 git）
   const mounts = await myco.mounts()
   assert.equal(mounts.length, 1)
   assert.equal(mounts[0].scope, 'repo')
   const cloud = await myco.cloudStatus()
   assert.ok(typeof cloud.cloudRoots === 'object')
+  const afterAdd = await myco.cloudAdd('demo', 'https://example.invalid/kb.git', {})
+  assert.ok(afterAdd.some((c) => c.name === 'demo'))
+  const afterRemove = await myco.cloudRemove('demo')
+  assert.ok(!afterRemove.some((c) => c.name === 'demo'))
 
   // 清理：卸载插件纤维（关闭 watcher/timer）
   if (typeof pluginFiber?.dispose === 'function') await pluginFiber.dispose()
   app.fiber.dispose?.()
 
-  console.log('✅ 宿主平面验证通过：ctx.myco 服务 / 8 个 Remote 方法 / 4 个工具 / daemon 索引 / 检索 / 挂载')
+  console.log('✅ 宿主平面验证通过：ctx.myco 服务 / 12 个 Remote 方法 / 4 个工具 / daemon 索引 / 检索 / 挂载 / cloud 注册')
 }
 
 verifyHostPlane().then(

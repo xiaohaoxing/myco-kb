@@ -21,6 +21,8 @@ myco status                        # 维护状态
 myco find 部署                      # 检索（tag×3 / 文件名×2 / 全文×1）
 myco sweep                         # 生命周期候选扫描（仅报告）
 myco profile list                  # 组合配置
+myco cloud add <name> <url>        # 注册云端知识根（git 仓库）
+myco cloud sync [name]             # 同步云端包（clone/pull/push）
 ```
 
 数据目录默认 `~/.myco`，可用 `MYCO_DATA` 覆盖。
@@ -35,7 +37,8 @@ lib/
   tools.js        agent 工具面（dsh-tools）
   daemon.js       后台守护：watcher + 定时维护
   core/           纯 Node 核心（CLI 与插件共用）
-    myco.js         编排器（挂载/索引/状态/检索/profile/sweep/cloudStatus）
+    myco.js         编排器（挂载/索引/状态/检索/profile/sweep/cloud*/sync）
+    sync.js        云端 git 同步原语（clone/pull/push/status，零依赖调系统 git）
     frontmatter.js  零依赖 frontmatter 解析
     manifest.js     kb.yaml 清单读取
     mount.js        挂载解析（repo:/local:/cloud:）
@@ -87,4 +90,4 @@ daemon 静默监听两个知识包，变更自动增量索引。
   宿主平面维护用 Cordis 插件自身 `setInterval` + 文件 watcher（已实现）。
 - 控制台挂在插件管理页 `settings.plugins.tab` slot（与 plugin-inventory 同槽）。
 
-进度：v0.1 CLI ✅；v0.2 控制台 tab + 远程服务 + daemon 宿主化 ✅；v0.3 云端同步；v0.4 动态装配。
+进度：v0.1 CLI ✅；v0.2 控制台 tab + 远程服务 + daemon 宿主化 ✅；**v0.3 云端 git 同步 ✅**（clone/pull/push/冲突报告，全流程实测）；v0.4 动态装配；v0.5 知识更新流。

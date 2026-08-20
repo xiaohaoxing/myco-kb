@@ -20,7 +20,11 @@ function usage() {
   myco profile list         列出组合配置
   myco profile use <name>   激活组合配置
   myco sweep                生命周期候选扫描（仅报告）
-  myco daemon               前台运行守护（watcher + 定时维护）
+  myco cloud add <n> <url>  注册云端知识根（git 仓库）
+  myco cloud list           列出云端根
+  myco cloud remove <n>     移除云端根
+  myco cloud sync [n]       同步云端包（clone/pull/push，默认全部）
+  myco daemon               前台运行守护（watcher + 定时维护 + 云同步）
   myco install-skills       安装 skills/ 到 ~/.agents/skills/
 
 环境变量:
@@ -108,6 +112,40 @@ async function main() {
       if (r.candidates.length === 0) { console.log('暂无生命周期候选'); return }
       for (const c of r.candidates) console.log(`[${c.kind}] ${c.packageId}/${c.rel} — ${c.reason}`)
       return
+    }
+    case 'cloud': {
+      const sub = args[0]
+      if (sub === 'add') {
+        if (!args[1] || !args[2]) throw new Error('用法: myco cloud add <name> <url> [branch]')
+        const root = myco.cloudAdd(args[1], args[2], { branch: args[3] ?? 'main' })
+        console.log(`已注册云端根 ${args[1]} → ${root.url}（branch: ${root.branch}，clone 到 ${root.path}）`)
+        console.log('提示: 之后用 `myco mount cloud:' + args[1] + '` 挂载，`myco cloud sync ' + args[1] + '` 同步')
+        return
+      }
+      if (sub === 'list') {
+        for (const c of myco.cloudList()) console.log(`${c.name}  ${c.url || '(无 url)'}  [${c.branch}]  ${c.path}`)
+        return
+      }
+      if (sub === 'remove') {
+        if (!args[1]) throw new Error('用法: myco cloud remove <name>')
+        myco.cloudRemove(args[1])
+        console.log(`已移除云端根 ${args[1]}`)
+        return
+      }
+      if (sub === 'sync') {
+        const r = args[1] ? await myco.syncPackage(args[1]) : await myco.syncAll()
+        const list = Array.isArray(r?.results) ? r.results : [r]
+        for (const item of list) {
+          if (item.ok) {
+            const detail = item.action === 'cloned' ? 'clone 完成' : `stages: ${item.stages?.join(' → ') ?? ''}`
+            console.log(`✓ ${item.name}: ${detail}`)
+          } else {
+            console.log(`✗ ${item.name}: ${item.error}${item.stage ? `（失败于 ${item.stage}）` : ''}`)
+          }
+        }
+        return
+      }
+      throw new Error(`未知子命令: ${sub}`)
     }
     case 'daemon': {
       myco.daemon()

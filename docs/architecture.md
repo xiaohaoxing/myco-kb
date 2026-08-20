@@ -56,7 +56,20 @@ scripts/install-profile.sh   # 安装进 ~/.dsh/profiles/web（重启 Harness �
 
 ## 路线
 
-v0.1 CLI ✅ → v0.2 控制台 tab + 远程服务 + daemon 宿主化 ✅ → v0.3 云端 git 同步 + 远程库管理（cloudStatus 数据面已就绪）→ v0.4 按任务动态装配 profile/工具 → **v0.5 知识更新流（染色/传播）**。
+v0.1 CLI ✅ → v0.2 控制台 tab + 远程服务 + daemon 宿主化 ✅ → **v0.3 云端 git 同步 ✅** → v0.4 按任务动态装配 profile/工具 → **v0.5 知识更新流（染色/传播）**。
+
+## v0.3 云端 git 同步（已完成）
+
+- `lib/core/sync.js`：零依赖 git 原语（child_process 调系统 git，非交互/超时/防注入）。
+  - `normalizeCloudRoot`：cloudRoots 兼容字符串 path（旧格式）与 `{url, path, branch}`。
+  - `gitStatus`：branch/ahead/behind/dirty（注意 `rev-list --left-right --count` 输出为 `HEAD独有 upstream独有`，ahead/behind 顺序已修正）。
+  - `syncCloudPackage`：clone（缺失时）→ pull（ff-only）→ commit 本地改动（message 自动生成）→ push；失败返回 `{ok:false, stage, error}`，冲突不自动解决、本地改动不丢。
+- `cloudRoots` 配置：`{ name: { url, path, branch } }`；默认 clone 到 `~/.myco/cloud/<name>`。
+- CLI：`myco cloud add/list/remove/sync [name]`。
+- daemon：定时维护时防重入云同步（git 超时 120s，不阻塞定时循环）。
+- remote 服务：`cloudSync/cloudAdd/cloudRemove/cloudList`（共 12 个 Remote 方法）。
+- 控制台远程库区：云端根列表 + 挂载 git 状态（branch/ahead/behind/dirty）+ 同步按钮。
+- 冲突策略：pull 用 ff-only——分叉/冲突报告并保留本地改动，人工 merge 后 sync 恢复（全流程实测：clone → push → pull → 冲突报告 → 人工解决 → 恢复）。
 
 ## v0.5 知识更新流（设计已定稿，ADR-010 技术栈已确认）
 
