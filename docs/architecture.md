@@ -21,6 +21,7 @@
 1. **loader entry 必须同时有 `id` 和 `name`**：Cordis loader 用 `options.name` 去 `import()` 插件；只有 `id` 时 name 为 `undefined` → `undefined.startsWith(...)` 启动崩溃。`cordis.patch.yml` 的 insert 条目两个都要写（`docs/myco-kb.patch.example.yml` 已带注释）。
 2. **client 插件不要在顶层 inject 里硬等动态 remote namespace**（`remote.myco`）：会让整个 web boot 卡在插件激活阶段（`pending (waiting for service: remote.myco)`）。remote 面是「面板打开后可用则用，不可用则等待」的懒依赖，不是「web 启动必须已有」的硬依赖。
 3. **回归测试模式**：`test/client.test.js` mock `window.__ModuleLoader__` 真加载 bundle，断言顶层 inject 不含 `remote.myco`——防止以后重构把硬依赖加回去。
+4. **slot 注册必须带 `label`**：`settings.plugins.tab` 渲染时 `resolveSlotLabel(entry.options.label) ?? ""`——缺 label 的 entry 标题为空，tab 直接不显示（2026-08-20 实测：client bundle 已装载、管理页正常，唯独 tab 不出现）。同时 label 回调里用到的 t 要在 apply 里先 `ctx.locale.bind(NS)`。
 
 ## 数据模型
 
