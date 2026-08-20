@@ -33,6 +33,14 @@ async function loadClientBundle() {
   return exports ?? module.exports
 }
 
+test('button 工具函数的 children 用参数 label（防 text/label 类未定义引用回归）', async () => {
+  const fs = await import('node:fs')
+  const code = fs.readFileSync(new URL('../lib/client.js', import.meta.url), 'utf8')
+  const btn = code.slice(code.indexOf('function button'), code.indexOf('function sectionTitle'))
+  assert.ok(btn.includes('}, label)'), `button children 应为 label 参数，实际片段: ${btn.slice(-60)}`)
+  assert.ok(!btn.includes('}, text)'), 'button children 不应引用未定义变量 text')
+})
+
 test('client bundle does not hard-require remote.myco at boot', async () => {
   const bundle = await loadClientBundle()
   assert.ok(bundle.inject.includes('slots'))
