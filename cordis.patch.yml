@@ -1,0 +1,10 @@
+# MyCo-KB 插件自带补丁层（bundle 自声明）
+# 由 package.json 的 dsh.bundle.patch 指向；profile 通过 dsh.profile.bundles 装载本包时，
+# 本文件即该包的 entry 声明（id+name 都必须有——loader 用 name import，缺则崩溃）。
+# 用户可在 profile/cordis.patch.yml 里以同名 id 覆盖 config（patch 叠加语义）。
+- insert:
+    - id: '@dsh/myco-kb'
+      name: '@dsh/myco-kb'
+      config:
+        # 定时维护间隔（小时）：索引重建 → 生命周期扫描 → 云端 git 同步
+        maintenanceIntervalHours: 6

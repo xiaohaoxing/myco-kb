@@ -44,26 +44,27 @@ else
   echo "警告：profile 没有 package.json，已跳过依赖声明（请手动添加 ${NAME} 依赖）" >&2
 fi
 
-# 3. 在 cordis.patch.yml 写入插件补丁（幂等；id 与 name 都必须有 —— loader 用 name import）
-PATCH="$PROFILE/cordis.patch.yml"
-PATCH_BLOCK="
-# MyCo-KB 插件（由 install-profile.sh 添加）：知识库管理控制台 + 静默后台守护。
-- insert:
-    - id: '@dsh/myco-kb'
-      name: '@dsh/myco-kb'
-      config:
-        maintenanceIntervalHours: 6"
-
-if [ -f "$PATCH" ] && grep -q "@dsh/myco-kb" "$PATCH"; then
-  echo "${NAME} 已在 cordis.patch.yml 中，跳过"
-elif [ -f "$PATCH" ] && [ "$(grep -c '^-' "$PATCH")" -gt 0 ]; then
-  echo "cordis.patch.yml 已有其他条目，请手动把以下补丁追加到文件末尾：" >&2
-  echo "$PATCH_BLOCK" >&2
-else
-  printf '%s\n' "$PATCH_BLOCK" >> "$PATCH"
-  echo "已写入 $PATCH"
-fi
+# 3. 标准 bundle 装载：把本包加进 profile 的 dsh.profile.bundles
+#   （插件自带 cordis.patch.yml + package.json 的 dsh.bundle.patch 声明 entry；
+#    loader 用 entry.name import，id 与 name 必须一致 —— 缺 name 会启动崩溃）
+python3 - "$PROFILE/package.json" "$NAME" <<'PYBUNDLES'
+import json, sys
+pkg_path, name = sys.argv[1], sys.argv[2]
+with open(pkg_path, encoding='utf8') as f:
+    pkg = json.load(f)
+bundles = pkg.setdefault('dsh', {}).setdefault('profile', {}).setdefault('bundles', [])
+if name not in bundles:
+    bundles.append(name)
+    with open(pkg_path, 'w', encoding='utf8') as f:
+        json.dump(pkg, f, ensure_ascii=False, indent=2)
+        f.write('\n')
+    print(f'✓ {name} 已加入 dsh.profile.bundles')
+else:
+    print(f'✓ {name} 已在 dsh.profile.bundles')
+PYBUNDLES
 
 echo
-echo "✅ 安装完成。重启 Harness 后生效（插件管理页 Plugins 设置区出现 MyCo-KB 控制台 tab）。"
-echo "   若启动崩溃报 'undefined.startsWith'：确认 cordis.patch.yml 的条目同时有 id 和 name。"
+echo "✅ 安装完成（标准 bundle 装载）。重启 Harness 后："
+echo "   - 插件管理页显示为 DSH 插件（不再显示「不是 DSH 插件」）"
+echo "   - Plugins 设置区出现 MyCo-KB 控制台 tab"
+echo "   - 若要覆盖插件默认配置：在 profile/cordis.patch.yml 用同名 id 写 config 覆盖（patch 叠加语义）"
