@@ -64,7 +64,7 @@ scripts/install-profile.sh   # 安装进 ~/.dsh/profiles/web（重启 Harness �
 
 ## 路线
 
-v0.1 CLI ✅ → v0.2 控制台 tab + 远程服务 + daemon 宿主化 ✅ → **v0.3 云端 git 同步 ✅** → v0.4 按任务动态装配 profile/工具 → **v0.5 知识更新流（染色/传播）**。
+v0.1 CLI ✅ → v0.2 控制台 tab + 远程服务 + daemon 宿主化 ✅ → **v0.3 云端 git 同步 ✅** → v0.4 按任务动态装配 profile/工具 → **v0.5 知识更新流（染色/传播）数据层 ✅**（契约解析 / 变更检测 / 影响分析 / stale 队列，全链路实测）→ v0.5.1 控制台染色/传播视图 + subagent 调度。
 
 ## v0.3 云端 git 同步（已完成）
 
@@ -79,7 +79,16 @@ v0.1 CLI ✅ → v0.2 控制台 tab + 远程服务 + daemon 宿主化 ✅ → **
 - 控制台远程库区：云端根列表 + 挂载 git 状态（branch/ahead/behind/dirty）+ 同步按钮。
 - 冲突策略：pull 用 ff-only——分叉/冲突报告并保留本地改动，人工 merge 后 sync 恢复（全流程实测：clone → push → pull → 冲突报告 → 人工解决 → 恢复）。
 
-## v0.5 知识更新流（设计已定稿，ADR-010 技术栈已确认）
+## v0.5 知识更新流（数据层已完成：契约/变更/影响/stale）
+
+- `lib/core/contract.js`：Obsidian callout 契约块解析（`> [!myco-contract] id vN`）+ `[[页#契约]]` 强引用提取（锚点命中已知契约才构成传播边）
+- `lib/core/events.js`：内容 hash 对比 → 变更事件（首次扫描建立基线；契约变更=major/内容=patch）；`contractDiff` 对比前后契约
+- `lib/core/store.js`：node:sqlite（events append-only / stale 注册表 / hashes 缓存）
+- `lib/core/impact.js`：`buildContractIndex`（两遍扫描）→ `analyzeImpact`（同包=染色，跨包=传播，kb.yaml dependencies 反向=依赖传播）
+- daemon：维护周期自动变更检测，major 事件自动影响分析标 stale（待人工确认）
+- CLI：`scan / events / impact <id> / stale [clear] / contracts`
+
+（原有设计说明保留）
 
 - **变更源双轨**：git 化包用 `git diff`（commit=版本、tag=语义化版本）；本地全局（Obsidian iCloud）用内容 hash 对比 → 统一变更事件 `{ nodeId, kind, before, after, bump }`
 - **存储分层**：文件为唯一事实源；`node:sqlite`（内置，零依赖）做增量缓存/持久状态——`events`（append-only 事件日志）/ `graph`（nodes/edges 缓存，可重建）/ `state`（stale/版本）/ `queue`（传播队列）

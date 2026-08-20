@@ -24,6 +24,12 @@ function usage() {
   myco cloud list           列出云端根
   myco cloud remove <n>     移除云端根
   myco cloud sync [n]       同步云端包（clone/pull/push，默认全部）
+  myco scan                 变更检测（内容 hash 对比 → 变更事件）
+  myco events [n]           变更事件日志
+  myco impact <eventId>     影响分析（染色/传播集，传播集自动标 stale）
+  myco stale                列出 stale（待确认受影响节点）
+  myco stale clear <node>   确认解除 stale
+  myco contracts            列出全库契约块
   myco daemon               前台运行守护（watcher + 定时维护 + 云同步）
   myco install-skills       安装 skills/ 到 ~/.agents/skills/
 
@@ -146,6 +152,46 @@ async function main() {
         return
       }
       throw new Error(`未知子命令: ${sub}`)
+    }
+    case 'scan': {
+      const events = myco.scanChanges()
+      if (events.length === 0) { console.log('无变更'); return }
+      for (const e of events) console.log(`#${e.id} [${e.bump}] ${e.packageId}/${e.rel}${e.contractId ? `  契约:${e.contractId}` : ''}`)
+      return
+    }
+    case 'events': {
+      const events = myco.listEvents(args[0] ? Number(args[0]) : 20)
+      if (events.length === 0) { console.log('暂无事件'); return }
+      for (const e of events) console.log(`#${e.id} [${e.bump}] ${e.packageId}/${e.rel}  ${e.kind}${e.contractId ? `  ${e.contractId}` : ''}  ${e.at}`)
+      return
+    }
+    case 'impact': {
+      if (!args[0]) throw new Error('用法: myco impact <eventId>')
+      const r = await myco.impact(Number(args[0]))
+      console.log(`事件 #${r.event.id} [${r.event.bump}] ${r.event.packageId}/${r.event.rel}${r.event.contractId ? `  契约:${r.event.contractId}` : ''}`)
+      console.log(`染色（同包派生）: ${r.dye.length ? r.dye.map((d) => `${d.packageId}/${d.rel}`).join(', ') : '无'}`)
+      console.log(`传播（跨包引用）: ${r.spread.length ? r.spread.map((s) => `${s.packageId}/${s.rel}`).join(', ') : '无'}`)
+      console.log(`依赖传播: ${r.pkgSpread.length ? r.pkgSpread.map((p) => p.packageId).join(', ') : '无'}`)
+      if (r.spread.length > 0 || r.pkgSpread.length > 0) console.log('→ 已标 stale（待确认），`myco stale` 查看')
+      return
+    }
+    case 'stale': {
+      if (args[0] === 'clear') {
+        if (!args[1]) throw new Error('用法: myco stale clear <node>')
+        myco.clearStale(args[1])
+        console.log(`已解除 stale: ${args[1]}`)
+        return
+      }
+      const stale = myco.listStale()
+      if (stale.length === 0) { console.log('无 stale（传播队列为空）'); return }
+      for (const s of stale) console.log(`${s.node}  — ${s.reason}（${s.at}）`)
+      return
+    }
+    case 'contracts': {
+      const cs = myco.contracts()
+      if (cs.length === 0) { console.log('无契约块'); return }
+      for (const c of cs) console.log(`${c.packageId}/${c.rel}  ${c.id} v${c.version}  ${c.content.slice(0, 40)}`)
+      return
     }
     case 'daemon': {
       myco.daemon()
