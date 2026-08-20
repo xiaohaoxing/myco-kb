@@ -44,8 +44,26 @@ else
   echo "警告：profile 没有 package.json，已跳过依赖声明（请手动添加 ${NAME} 依赖）" >&2
 fi
 
+# 3. 在 cordis.patch.yml 写入插件补丁（幂等；id 与 name 都必须有 —— loader 用 name import）
+PATCH="$PROFILE/cordis.patch.yml"
+PATCH_BLOCK="
+# MyCo-KB 插件（由 install-profile.sh 添加）：知识库管理控制台 + 静默后台守护。
+- insert:
+    - id: '@dsh/myco-kb'
+      name: '@dsh/myco-kb'
+      config:
+        maintenanceIntervalHours: 6"
+
+if [ -f "$PATCH" ] && grep -q "@dsh/myco-kb" "$PATCH"; then
+  echo "${NAME} 已在 cordis.patch.yml 中，跳过"
+elif [ -f "$PATCH" ] && [ "$(grep -c '^-' "$PATCH")" -gt 0 ]; then
+  echo "cordis.patch.yml 已有其他条目，请手动把以下补丁追加到文件末尾：" >&2
+  echo "$PATCH_BLOCK" >&2
+else
+  printf '%s\n' "$PATCH_BLOCK" >> "$PATCH"
+  echo "已写入 $PATCH"
+fi
+
 echo
-echo "已安装符号链接。下一步（二选一）："
-echo "  1) 在 ~/.dsh/profiles/web/cordis.yml 的 plugins 列表中加入 ${NAME}（推荐，显式配置）"
-echo "  2) 如果 profile 支持自动发现，重启 Harness 后插件会自动加载"
-echo "重启 Harness 后，插件管理页的 Plugins 设置区会出现 MyCo-KB 控制台 tab。"
+echo "✅ 安装完成。重启 Harness 后生效（插件管理页 Plugins 设置区出现 MyCo-KB 控制台 tab）。"
+echo "   若启动崩溃报 'undefined.startsWith'：确认 cordis.patch.yml 的条目同时有 id 和 name。"

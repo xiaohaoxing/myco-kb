@@ -9,6 +9,10 @@
 
 - insert:
     - id: '@dsh/myco-kb'
+      # ⚠️ name 必填：Cordis loader 用 options.name 去 import() 插件，
+      #    只有 id 时 name 缺失 → `undefined.startsWith(...)` 启动崩溃（2026-08-20 实测踩坑）。
+      #    id 与 name 都指向包名 '@dsh/myco-kb'。
+      name: '@dsh/myco-kb'
       config:
         # 数据目录：索引/状态/配置/云端 clone 的存放处（默认 ~/.myco，可用 MYCO_DATA 覆盖）
         # dataDir: '/Users/you/.myco'

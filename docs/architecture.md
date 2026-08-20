@@ -12,9 +12,15 @@
 
 ## 远程服务（Typert）
 
-- `lib/remote.js`：`MycoRemoteService extends TypertRemoteService`，`super(ctx, 'myco')` 注册服务并绑定 Gateway；8 个导出方法（status/find/index/sweep/profiles/useProfile/mounts/cloudStatus）。
+- `lib/remote.js`：`MycoRemoteService extends TypertRemoteService`，`super(ctx, 'myco')` 注册服务并绑定 Gateway；12 个导出方法（status/find/index/sweep/profiles/useProfile/mounts/cloudStatus/cloudSync/cloudAdd/cloudRemove/cloudList）。
 - **不使用 `@Remote()` 装饰器语法**：node 26 不支持装饰器且已移除 `--experimental-decorators`；在构造器里用导出的 `Remote(name)` 函数手动复刻装饰器标记（收集 addInitializer，实例就绪后以 `this=实例` 调用）。DSH 运行时编译时则自动降级处理。
-- client 侧 `inject: ['remote', 'remote.myco', 'workspaces', 'slots', 'locale']` 获得 typed face。
+- client 侧 **不硬依赖 `remote.myco`**（2026-08-20 实测踩坑）：顶层 `inject` 只声明 `['slots', 'remote', 'workspaces', 'locale']`；面板组件里用 `ctx.get('remote.myco', false)` 懒读取 + 监听 `internal/service` 事件，等远程服务挂载后刷新。`test/client.test.js` 回归防复发。
+
+## DSH 插件开发踩坑实录（2026-08-20，真实启动验证）
+
+1. **loader entry 必须同时有 `id` 和 `name`**：Cordis loader 用 `options.name` 去 `import()` 插件；只有 `id` 时 name 为 `undefined` → `undefined.startsWith(...)` 启动崩溃。`cordis.patch.yml` 的 insert 条目两个都要写（`docs/myco-kb.patch.example.yml` 已带注释）。
+2. **client 插件不要在顶层 inject 里硬等动态 remote namespace**（`remote.myco`）：会让整个 web boot 卡在插件激活阶段（`pending (waiting for service: remote.myco)`）。remote 面是「面板打开后可用则用，不可用则等待」的懒依赖，不是「web 启动必须已有」的硬依赖。
+3. **回归测试模式**：`test/client.test.js` mock `window.__ModuleLoader__` 真加载 bundle，断言顶层 inject 不含 `remote.myco`——防止以后重构把硬依赖加回去。
 
 ## 数据模型
 
