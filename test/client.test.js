@@ -23,6 +23,9 @@ async function loadClientBundle() {
         createElement: () => null,
         useEffect: () => {},
         useState: (initial) => [initial, () => {}],
+        Component: class Component {
+          constructor(props) { this.props = props }
+        },
       }
     }
     throw new Error(`unexpected require: ${name}`)
