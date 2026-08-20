@@ -1,0 +1,38 @@
+# ============================================================
+# MyCo-KB 插件配置样例
+# 用途：放入 DSH profile 的补丁层（默认 ~/.dsh/profiles/web/cordis.patch.yml）
+# 前提：插件已安装 —— ① 符号链接 node_modules/@dsh/myco-kb → 插件目录
+#                          ② profile package.json dependencies 声明
+#                             "@dsh/myco-kb": "file:./node_modules/@dsh/myco-kb"
+# 生效：修改后重启 Harness（配置在启动时合成，不支持热加载）
+# ============================================================
+
+- insert:
+    - id: '@dsh/myco-kb'
+      config:
+        # 数据目录：索引/状态/配置/云端 clone 的存放处（默认 ~/.myco，可用 MYCO_DATA 覆盖）
+        # dataDir: '/Users/you/.myco'
+
+        # 定时维护间隔（小时）。daemon 每周期执行：
+        #   索引重建 → 生命周期扫描（sweep）→ 云端 git 同步（cloud sync）
+        # 取值范围建议 1~24；默认 6
+        maintenanceIntervalHours: 6
+
+        # 启动时预挂载的知识根（可选，数组）
+        # 说明：持久挂载也可以用 CLI `myco mount <spec>` 写入 dataDir/config.json，
+        #       插件启动时自动读取，与这里等效，二选一即可（推荐 CLI 管理）。
+        # mounts:
+        #   - 'repo:/Users/you/repos/api-gateway/docs'     # 随代码走的知识包
+        #   - 'cloud:shared-kb'                            # 云端 git 知识包
+        #
+        # cloud: 挂载需先在 config.json 的 cloudRoots 定义远端：
+        #   {
+        #     "cloudRoots": {
+        #       "shared-kb": {
+        #         "url": "git@github.com:you/shared-kb.git",
+        #         "path": "/Users/you/.myco/cloud/shared-kb",
+        #         "branch": "main"
+        #       }
+        #     }
+        #   }
+        # 等价 CLI：myco cloud add shared-kb git@github.com:you/shared-kb.git
