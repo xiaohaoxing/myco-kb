@@ -60,7 +60,26 @@ daemon 形态（装进 Harness 后）：定时维护周期内自动执行 `syncA
   → 控制台「传播队列」+ 飞书通知
 ```
 
-## 五、冲突与回滚
+## 五、repo → cloud 依赖（真实案例，2026-08-21）
+
+超合体数据工厂 KB 声明依赖云端包，配额口径权威收敛到云端契约：
+
+```yaml
+# 超合体数据工厂/kb.yaml
+scope: repo
+dependencies: [chaoheti-kb]
+```
+
+```markdown
+<!-- 数据指标口径.md -->
+- 配额占用按平台账号条目计…权威定义见云端共享契约 [[docs/contracts#shared-quota-rule]]
+```
+
+实测：云端契约 `shared-quota-rule` v1→v2 → `myco cloud sync` → 事件 #27 [major] →
+传播（跨包引用）超合体数据工厂/数据指标口径.md + 依赖传播（dependencies 声明）超合体数据工厂
+→ stale 自动标记 + webhook 通知 → 控制台确认。
+
+## 六、冲突与回滚
 
 - **pull 冲突**：`myco cloud sync` 用 ff-only，分叉/冲突时**报告且不自动解决**，本地改动不丢。人工 `git merge` 后再次 sync 恢复（v0.3 全流程实测）。
 - **回滚云端**：git 本身就是版本源，`git log` / `git revert` 即可（`git revert` 后 `myco cloud sync` push）。
