@@ -39,6 +39,13 @@ async function verifyHostPlane() {
       return () => {}
     },
   })
+  app.provide('subagents', {
+    start: async (_provider, request) => ({
+      result: Promise.resolve({ output: `[mock subagent] 草案 for ${request.label ?? '?'}`, stopReason: 'complete' }),
+      dispose: async () => {},
+    }),
+    list: () => ['spawn'],
+  })
 
   const pluginFiber = app.plugin(plugin, {
     dataDir,
@@ -70,11 +77,18 @@ async function verifyHostPlane() {
   const call = async (url, method = 'GET', body = null) => {
     let status = 0
     let payload = ''
+    let remaining = body ?? ''
     const req = {
       method,
       url,
-      on() {},
-      ...(body !== null ? { body } : {}),
+      on(event, cb) {
+        if (event === 'data' && remaining) {
+          cb(Buffer.from(remaining))
+          remaining = ''
+        } else if (event === 'end') {
+          cb()
+        }
+      },
     }
     const res = {
       writeHead(code) { status = code },
@@ -99,6 +113,31 @@ async function verifyHostPlane() {
   assert.equal(wh.status, 200)
   assert.ok('enabled' in wh.payload)
   assert.ok('url' in wh.payload)
+
+  // drafts API 链路：造 stale → POST /draft → mock subagent 起草 → GET /drafts 有记录
+  const pkgId = (await myco.status()).packages[0].id
+  myco.core.getStore().markStale(`${pkgId}/consumer.md`, {
+    packageId: pkgId, rel: 'consumer.md', reason: 'host-check 测试 stale', eventId: null,
+  })
+  const draftRes = await call('/myco/api/draft', 'POST', JSON.stringify({ node: `${pkgId}/consumer.md` }))
+  assert.equal(draftRes.status, 200)
+  assert.equal(draftRes.payload.status, 'started')
+  // 等待后台起草完成（mock subagents 立即 resolve）
+  let drafts = []
+  for (let i = 0; i < 20; i++) {
+    const r = await call('/myco/api/drafts')
+    drafts = r.payload
+    if (drafts.some((d) => d.status === 'done')) break
+    await new Promise((r) => setTimeout(r, 50))
+  }
+  const done = drafts.find((d) => d.node === `${pkgId}/consumer.md`)
+  assert.ok(done, '应有起草记录')
+  assert.equal(done.status, 'done')
+  assert.ok(done.draft.includes('mock subagent'), done.draft)
+  // 清理：解除 stale + 清除 draft + 关闭 sqlite handle（否则进程不退出）
+  await call('/myco/api/stale/clear', 'POST', JSON.stringify({ node: `${pkgId}/consumer.md` }))
+  await call('/myco/api/draft/clear', 'POST', JSON.stringify({ node: `${pkgId}/consumer.md` }))
+  myco.core.getStore().close()
   const nf = await call('/myco/api/nothing')
   assert.equal(nf.status, 404)
 
