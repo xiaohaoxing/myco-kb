@@ -80,6 +80,7 @@ v0.1 CLI ✅ → v0.2 控制台 tab + 远程服务 + daemon 宿主化 ✅ → **
 - 控制台远程库区：云端根列表 + 挂载 git 状态（branch/ahead/behind/dirty）+ 同步按钮。
 - 冲突策略：pull 用 ff-only——分叉/冲突报告并保留本地改动，人工 merge 后 sync 恢复（全流程实测：clone → push → pull → 冲突报告 → 人工解决 → 恢复）。
 
+- **CLI sync 自动变更检测 + 生产接入**：`myco cloud sync` 后自动 scan（pull 新内容立即进事件流）；`docs/cloud-production.md`（GitLab/SSH/多机/跨机传播/冲突回滚），多机实测通过。
 ## v0.5 知识更新流（数据层已完成：契约/变更/影响/stale）
 
 - `lib/core/contract.js`：Obsidian callout 契约块解析（`> [!myco-contract] id vN`）+ `[[页#契约]]` 强引用提取（锚点命中已知契约才构成传播边）
