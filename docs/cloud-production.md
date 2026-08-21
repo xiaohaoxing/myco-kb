@@ -86,7 +86,7 @@ dependencies: [chaoheti-kb]
 
 ## 六、同步订阅（opt-in，2026-08-21）
 
-云端包默认**不自动同步**——只有显式订阅的包才进自动同步名单（daemon 定时 + `myco cloud sync` 默认）：
+云端包默认**不自动同步**——只有显式订阅的包才进自动同步名单（daemon 定时 + `myco cloud sync` 默认）。订阅在**控制台「云端同步设置」区勾选**（checkbox），或 CLI：
 
 ```bash
 myco cloud add shared <url>          # 注册（默认 sync: false，不自动同步）
