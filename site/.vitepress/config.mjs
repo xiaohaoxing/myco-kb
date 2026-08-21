@@ -24,7 +24,7 @@ const design = [
 
 export default defineConfig({
   title: 'MyCo-KB',
-  description: '真菌之库 · 我的公司 —— 知识库管理系统（DeepSeek Harness 插件形态）：知识包 / 组合配置 / 生命周期 / 跨包检索 / 云端同步 / 知识更新流',
+  description: 'MyCo-KB —— 面向 DeepSeek Harness 的知识库管理系统：知识包 / 组合配置 / 生命周期 / 跨包检索 / 云端同步 / 知识更新流',
   lang: 'zh-CN',
   cleanUrls: true,
   ignoreDeadLinks: true,
@@ -32,7 +32,7 @@ export default defineConfig({
     ['meta', { name: 'theme-color', content: '#0f766e' }],
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],
     ['meta', { property: 'og:title', content: 'MyCo-KB' }],
-    ['meta', { property: 'og:description', content: '真菌之库 · 我的公司 —— 知识库管理系统（DeepSeek Harness 插件形态）' }],
+    ['meta', { property: 'og:description', content: 'MyCo-KB —— 面向 DeepSeek Harness 的知识库管理系统：知识包 / 组合配置 / 生命周期 / 跨包检索 / 云端同步 / 知识更新流' }],
   ],
   themeConfig: {
     logo: '/logo.svg',

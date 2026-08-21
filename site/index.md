@@ -1,29 +1,8 @@
 ---
 layout: home
-
-hero:
-  name: MyCo-KB
-  text: 真菌之库 · 我的公司
-  tagline: 面向 DeepSeek Harness 的知识库管理系统。知识包统一挂载、组合配置按需激活、生命周期自动演进、跨包检索即问即答、云端 git 同步、契约驱动的知识更新流 —— 让知识像菌丝网络一样生长与传播。
-  actions:
-    - theme: brand
-      text: 快速开始
-      link: /docs/quickstart
-    - theme: alt
-      text: 产品特性
-      link: /features
-    - theme: alt
-      text: 系统设计
-      link: /design/overview
 ---
 
-<div class="home-section" style="padding-top: 4px;">
-  <div class="badge-row">
-    <span class="home-badge"><span class="dot"></span>&nbsp;DeepSeek Harness 插件 · 当前版本 <b>v0.5.3</b></span>
-    <span class="pill">MIT License</span>
-    <span class="pill">零运行时依赖核心</span>
-  </div>
-</div>
+<HomeHero />
 
 <TerminalDemo />
 

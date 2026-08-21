@@ -84,7 +84,22 @@ dependencies: [chaoheti-kb]
 - **pull 冲突**：`myco cloud sync` 用 ff-only，分叉/冲突时**报告且不自动解决**，本地改动不丢。人工 `git merge` 后再次 sync 恢复（v0.3 全流程实测）。
 - **回滚云端**：git 本身就是版本源，`git log` / `git revert` 即可（`git revert` 后 `myco cloud sync` push）。
 
-## 六、配置速查
+## 六、同步订阅（opt-in，2026-08-21）
+
+云端包默认**不自动同步**——只有显式订阅的包才进自动同步名单（daemon 定时 + `myco cloud sync` 默认）：
+
+```bash
+myco cloud add shared <url>          # 注册（默认 sync: false，不自动同步）
+myco cloud add shared <url> --sync   # 注册并订阅
+myco cloud sync on shared            # 订阅（进自动同步名单）
+myco cloud sync off shared           # 退订（不再自动同步）
+myco cloud sync shared               # 手动强制同步（未订阅也可用）
+myco cloud list                      # 🔔=已订阅
+```
+
+语义：**新增云端包/工作区默认不自动同步远程**——需要哪个进同步，显式订阅哪个。手动 `cloud sync <name>` 不受订阅限制（显式操作随时可用）。
+
+## 七、配置速查
 
 ```bash
 myco cloud add <name> <url> [branch]   # 注册云端根（默认 branch main）

@@ -172,3 +172,20 @@ test('webhook：配置读写 + 通知文案 + 发送（mock fetch）', async () 
   myco.setWebhook('')
   assert.equal(myco.getWebhook().enabled, false)
 })
+
+test('cloud 订阅（opt-in）：默认不同步，syncAll 只同步已订阅', async () => {
+  const { Myco } = await import('../lib/core/myco.js')
+  const myco = new Myco({ dataDir: mkdtempSync(join(tmpdir(), 'myco-sub-')) })
+  // 默认 sync: false
+  myco.cloudAdd('a', 'git@x:a.git')
+  assert.equal(myco.cloudList()[0].sync, false)
+  // 订阅
+  myco.cloudSubscribe('a', true)
+  assert.equal(myco.cloudList()[0].sync, true)
+  // 退订
+  myco.cloudSubscribe('a', false)
+  assert.equal(myco.cloudList()[0].sync, false)
+  // 带 sync 参数 add
+  myco.cloudAdd('b', 'git@x:b.git', { sync: true })
+  assert.equal(myco.cloudList().find((c) => c.name === 'b').sync, true)
+})

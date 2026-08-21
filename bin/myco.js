@@ -20,10 +20,12 @@ function usage() {
   myco profile list         列出组合配置
   myco profile use <name>   激活组合配置
   myco sweep                生命周期候选扫描（仅报告）
-  myco cloud add <n> <url>  注册云端知识根（git 仓库）
-  myco cloud list           列出云端根
+  myco cloud add <n> <url>  注册云端知识根（git 仓库；默认不自动同步，--sync 订阅）
+  myco cloud sync on <n>    订阅云端包（进自动同步名单，opt-in）
+  myco cloud sync off <n>   退订云端包（不再自动同步）
+  myco cloud list           列出云端根（🔔=已订阅）
   myco cloud remove <n>     移除云端根
-  myco cloud sync [n]       同步云端包（clone/pull/push，默认全部）
+  myco cloud sync [n]       同步云端包（默认只同步已订阅；指定 n 手动强制同步）
   myco scan                 变更检测（内容 hash 对比 → 变更事件）
   myco events [n]           变更事件日志
   myco impact <eventId>     影响分析（染色/传播集，传播集自动标 stale）
@@ -125,14 +127,23 @@ async function main() {
     case 'cloud': {
       const sub = args[0]
       if (sub === 'add') {
-        if (!args[1] || !args[2]) throw new Error('用法: myco cloud add <name> <url> [branch]')
-        const root = myco.cloudAdd(args[1], args[2], { branch: args[3] ?? 'main' })
+        if (!args[1] || !args[2]) throw new Error('用法: myco cloud add <name> <url> [branch] [--sync]')
+        const sync = args.includes('--sync')
+        const root = myco.cloudAdd(args[1], args[2], { branch: args[3] ?? 'main', sync })
         console.log(`已注册云端根 ${args[1]} → ${root.url}（branch: ${root.branch}，clone 到 ${root.path}）`)
-        console.log('提示: 之后用 `myco mount cloud:' + args[1] + '` 挂载，`myco cloud sync ' + args[1] + '` 同步')
+        console.log(sync
+          ? '✓ 已订阅同步（进自动同步名单）'
+          : 'ℹ 默认不自动同步（opt-in）：`myco cloud sync on ' + args[1] + '` 订阅后才进自动同步；手动 `myco cloud sync ' + args[1] + '` 随时可同步')
+        return
+      }
+      if (sub === 'sync' && (args[1] === 'on' || args[1] === 'off')) {
+        if (!args[2]) throw new Error(`用法: myco cloud sync ${args[1]} <name>`)
+        myco.cloudSubscribe(args[2], args[1] === 'on')
+        console.log(`${args[1] === 'on' ? '✓ 已订阅' : '✓ 已退订'}: ${args[2]}（${args[1] === 'on' ? '进自动同步名单' : '不再自动同步，手动 sync 仍可用'}）`)
         return
       }
       if (sub === 'list') {
-        for (const c of myco.cloudList()) console.log(`${c.name}  ${c.url || '(无 url)'}  [${c.branch}]  ${c.path}`)
+        for (const c of myco.cloudList()) console.log(`${c.sync ? '🔔' : '○'} ${c.name}  ${c.url || '(无 url)'}  [${c.branch}]  ${c.path}`)
         return
       }
       if (sub === 'remove') {
