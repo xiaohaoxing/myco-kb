@@ -64,7 +64,11 @@ else:
 PYBUNDLES
 
 echo
-echo "✅ 安装完成（标准 bundle 装载）。重启 Harness 后："
+echo "✅ 安装完成（标准 bundle 装载）。重启 Harness 前建议先初始化默认知识库："
+echo "   myco init    # 创建 ~/.myco-kb 默认知识库并挂载（新用户即用）"
+echo "   也可手动挂载自己的 Obsidian 路径：myco mount repo:/path/to/your/vault"
+echo
+echo "重启 Harness 后："
 echo "   - 插件管理页显示为 DSH 插件（不再显示「不是 DSH 插件」）"
 echo "   - Plugins 设置区出现 MyCo-KB 控制台 tab"
 echo "   - 若要覆盖插件默认配置：在 profile/cordis.patch.yml 用同名 id 写 config 覆盖（patch 叠加语义）"

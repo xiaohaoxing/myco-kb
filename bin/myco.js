@@ -10,7 +10,8 @@ function usage() {
   console.log(`myco — MyCo-KB 知识库管理器
 
 用法:
-  myco init [dir]           初始化知识包清单 kb.yaml（默认当前目录）
+  myco init                 初始化默认知识库 ~/.myco-kb（新用户安装即用）
+  myco init <dir>            在指定目录写 kb.yaml
   myco mount <spec>         挂载知识根（repo:/path | local:name | cloud:name | 直接路径）
   myco mounts               列出已挂载知识根
   myco unmount <spec>       移除挂载
@@ -66,7 +67,16 @@ async function main() {
       usage()
       return
     case 'init': {
-      const dir = args[0] ?? process.cwd()
+      // 无参数：初始化默认知识库 ~/.myco-kb（新用户安装即用）；有参数：在指定目录写 kb.yaml
+      if (!args[0]) {
+        const dir = myco.ensureDefaultKb()
+        console.log(`✓ 默认知识库就绪: ${dir}`)
+        console.log('  - 可用 Obsidian 打开该目录作为 vault')
+        console.log('  - 已自动挂载（`myco mounts` 查看）')
+        console.log('  - 想用已有知识库路径：`myco mount repo:/path/to/your/vault`')
+        return
+      }
+      const dir = args[0]
       const written = myco.initManifest(dir)
       console.log(written ? `已创建 ${dir}/kb.yaml` : `已存在 ${dir}/kb.yaml，跳过`)
       return

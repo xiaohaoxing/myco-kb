@@ -189,3 +189,23 @@ test('cloud 订阅（opt-in）：默认不同步，syncAll 只同步已订阅', 
   myco.cloudAdd('b', 'git@x:b.git', { sync: true })
   assert.equal(myco.cloudList().find((c) => c.name === 'b').sync, true)
 })
+
+test('ensureDefaultKb：创建默认库内容 + 幂等 + 挂载', async () => {
+  const { Myco } = await import('../lib/core/myco.js')
+  const myco = new Myco({ dataDir: mkdtempSync(join(tmpdir(), 'myco-kbdir-')) })
+  const dir = join(tmpdir(), 'myco-kb-test-' + Date.now())
+  const created = myco.ensureDefaultKb(dir)
+  assert.equal(created, dir)
+  // 内容
+  const { parseFlatYaml } = await import('../lib/core/frontmatter.js')
+  const kb = parseFlatYaml(await import('node:fs').then((fs) => fs.readFileSync(join(dir, 'kb.yaml'), 'utf8')))
+  assert.equal(kb.scope, 'local')
+  assert.equal(kb.id, 'myco-kb-local')
+  // 挂载
+  assert.ok(myco.mounts().some((m) => m.spec === `repo:${dir}`))
+  // 幂等：再跑不重复挂载
+  myco.ensureDefaultKb(dir)
+  assert.equal(myco.mounts().filter((m) => m.spec === `repo:${dir}`).length, 1)
+  // defaultKbDir 指向 ~/.myco-kb
+  assert.ok(myco.defaultKbDir().endsWith('.myco-kb'))
+})

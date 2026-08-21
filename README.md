@@ -25,7 +25,7 @@ myco cloud add <name> <url>        # 注册云端知识根（git 仓库）
 myco cloud sync [name]             # 同步云端包（clone/pull/push）
 ```
 
-数据目录默认 `~/.myco`，可用 `MYCO_DATA` 覆盖。
+数据目录默认 `~/.myco`，可用 `MYCO_DATA` 覆盖。**默认知识库路径 `~/.myco-kb`**（`myco init` 创建并挂载，可用 Obsidian 打开；也可手动改挂载到已有 Obsidian 知识库路径）。
 
 ## 目录结构
 
