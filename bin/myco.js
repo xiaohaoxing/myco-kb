@@ -161,6 +161,8 @@ async function main() {
             if (e.bump === 'major') {
               const r2 = await myco.impact(e.id)
               if (r2.spread.length > 0 || r2.pkgSpread.length > 0) console.log(`→ 事件 #${e.id} 已标 stale（待确认），\`myco stale\` 查看`)
+              // CLI 手动同步路径也发通知（与 daemon 行为一致）
+              myco.notifyMajor(e, r2).catch(() => {})
             }
           }
         }
