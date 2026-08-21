@@ -27,6 +27,10 @@ function usage() {
   myco cloud list           列出云端根（🔔=已订阅）
   myco cloud remove <n>     移除云端根
   myco cloud sync [n]       同步云端包（默认只同步已订阅；指定 n 手动强制同步）
+  myco remote set <spec> <url>  绑定本地包远程（git 目录会警告）；repo 包即可同步
+  myco remote list / clear      列出/解除远程绑定
+  myco sync on/off <spec>       订阅/退订包的自动同步（repo 需先 remote set）
+  myco sync [spec]              同步（默认只同步已订阅；指定 spec 手动强制）
   myco scan                 变更检测（内容 hash 对比 → 变更事件）
   myco events [n]           变更事件日志
   myco impact <eventId>     影响分析（染色/传播集，传播集自动标 stale）
@@ -132,6 +136,56 @@ async function main() {
       const r = myco.sweep()
       if (r.candidates.length === 0) { console.log('暂无生命周期候选'); return }
       for (const c of r.candidates) console.log(`[${c.kind}] ${c.packageId}/${c.rel} — ${c.reason}`)
+      return
+    }
+    case 'remote': {
+      const sub = args[0]
+      if (sub === 'set') {
+        if (!args[1] || !args[2]) throw new Error('用法: myco remote set <spec> <url>')
+        const r = myco.setRemote(args[1], args[2])
+        if (r.warning) console.log(r.warning)
+        console.log(`✓ 已绑定 ${args[1]} → ${args[2]}`)
+        console.log('  订阅自动同步：`myco sync on ' + args[1] + '`；手动同步：`myco sync ' + args[1] + '`')
+        return
+      }
+      if (sub === 'list' || sub === undefined) {
+        const remotes = myco.listRemotes()
+        if (remotes.length === 0) { console.log('无绑定远程的包'); return }
+        for (const r of remotes) console.log(`${r.sync ? '🔔' : '○'} ${r.spec}  →  ${r.remote}`)
+        return
+      }
+      if (sub === 'clear') {
+        if (!args[1]) throw new Error('用法: myco remote clear <spec>')
+        myco.clearRemote(args[1])
+        console.log(`已解除 ${args[1]} 的远程绑定`)
+        return
+      }
+      throw new Error(`未知子命令: ${sub}`)
+    }
+    case 'sync': {
+      const sub = args[0]
+      if (sub === 'on' || sub === 'off') {
+        if (!args[1]) throw new Error(`用法: myco sync ${sub} <spec>`)
+        myco.setSync(args[1], sub === 'on')
+        console.log(`${sub === 'on' ? '✓ 已订阅' : '✓ 已退订'}: ${args[1]}（repo 包需先 remote set 绑定远程）`)
+        return
+      }
+      if (args[0]) {
+        const r = await myco.syncPackage(args[0])
+        if (r.ok) {
+          console.log(`✓ ${r.name}: ${r.action === 'cloned' ? 'clone 完成' : `stages: ${r.stages?.join(' → ') ?? ''}`}`)
+        } else {
+          console.log(`✗ ${r.name}: ${r.error}${r.stage ? `（失败于 ${r.stage}）` : ''}`)
+        }
+        return
+      }
+      const r = await myco.syncAll()
+      const list = r.results
+      if (list.length === 0) { console.log('无已订阅的同步包（cloud sync on / sync on 订阅）'); return }
+      for (const item of list) {
+        if (item.ok) console.log(`✓ ${item.name}: ${item.action === 'cloned' ? 'clone 完成' : `stages: ${item.stages?.join(' → ') ?? ''}`}`)
+        else console.log(`✗ ${item.name}: ${item.error}${item.stage ? `（失败于 ${item.stage}）` : ''}`)
+      }
       return
     }
     case 'cloud': {

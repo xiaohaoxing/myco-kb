@@ -209,3 +209,54 @@ test('ensureDefaultKb：创建默认库内容 + 幂等 + 挂载', async () => {
   // defaultKbDir 指向 ~/.myco-kb
   assert.ok(myco.defaultKbDir().endsWith('.myco-kb'))
 })
+
+test('setRemote：git 目录警告 + 绑定存储 + 订阅', async () => {
+  const { Myco } = await import('../lib/core/myco.js')
+  const myco = new Myco({ dataDir: mkdtempSync(join(tmpdir(), 'myco-rm-')) })
+  // 非 git 目录：无警告
+  const plain = mkdtempSync(join(tmpdir(), 'plain-kb-'))
+  myco.addMount(`repo:${plain}`)
+  const r1 = myco.setRemote(`repo:${plain}`, 'git@x:y.git')
+  assert.equal(r1.warning, null)
+  // git 目录：警告
+  const gdir = mkdtempSync(join(tmpdir(), 'git-kb-'))
+  const { exec } = await import('node:child_process')
+  const execAsync = (cmd, cwd) => new Promise((res) => exec(cmd, { cwd }, res))
+  await execAsync('git init -q', gdir)
+  myco.addMount(`repo:${gdir}`)
+  const r2 = myco.setRemote(`repo:${gdir}`, 'git@x:y.git')
+  assert.ok(r2.warning && r2.warning.includes('已是 git 仓库'), r2.warning)
+  // 订阅
+  myco.setSync(`repo:${plain}`, true)
+  assert.equal(myco.listRemotes().find((r) => r.spec === `repo:${plain}`).sync, true)
+  assert.equal(myco.listRemotes().find((r) => r.spec === `repo:${gdir}`).sync, false)
+})
+
+test('syncRepoPackage：非 git 目录 init + pull/commit/push 全流程', async () => {
+  const { Myco } = await import('../lib/core/myco.js')
+  const { syncRepoPackage } = await import('../lib/core/sync.js')
+  const fs = await import('node:fs')
+  const { exec } = await import('node:child_process')
+  const execAsync = (cmd, cwd) => new Promise((res) => exec(cmd, { cwd }, res))
+  // 远程（bare）
+  const remote = join(tmpdir(), 'repo-remote-' + Date.now() + '.git')
+  await execAsync(`git init -q --bare ${remote}`, tmpdir())
+  // 远端初始内容（另一工作树 push）
+  const seed = join(tmpdir(), 'repo-seed-' + Date.now())
+  fs.mkdirSync(seed)
+  await execAsync('git init -q && git config user.name s && git config user.email s@l && echo seed > a.md && git add -A && git commit -q -m init && git branch -M main && git remote add origin ' + remote + ' && git push -q origin main', seed)
+  // 本地包目录（非 git，有本地内容）
+  const local = mkdtempSync(join(tmpdir(), 'repo-local-'))
+  fs.writeFileSync(join(local, 'b.md'), '本地知识')
+  const mount = { spec: `repo:${local}`, remote, scope: 'repo', sync: true }
+  const r = await syncRepoPackage(mount)
+  assert.ok(r.ok, JSON.stringify(r.error))
+  assert.ok(r.stages.includes('pull'), r.stages.join(','))
+  assert.ok(r.stages.includes('commit'), r.stages.join(','))
+  assert.ok(r.stages.includes('push'), r.stages.join(','))
+  // 远端应能看到本地内容
+  const check = join(tmpdir(), 'repo-check-' + Date.now())
+  await execAsync(`git clone -q ${remote} ${check}`, tmpdir())
+  assert.ok(fs.existsSync(join(check, 'b.md')), '本地 b.md 应被推送到远端')
+  assert.ok(fs.existsSync(join(check, 'a.md')), '远端 a.md 应保留')
+})
