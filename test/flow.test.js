@@ -32,6 +32,20 @@ test('parseContracts：无版本号默认 v1', () => {
   assert.equal(contracts[0].version, 1)
 })
 
+test('extractWikiRefs：代码块内的引用不提取（示例不算依赖）', () => {
+  const md = [
+    '正文见 [[数据指标口径#interaction-rate]]',
+    '```markdown',
+    ':::contract id:interaction-rate version:3',
+    '内容',
+    ':::',
+    '```',
+    '代码块内示例 [[数据指标口径#interaction-rate]] 不应提取',
+  ].join('\n')
+  const refs = extractContractRefs(md, new Set(['interaction-rate']))
+  assert.equal(refs.length, 1, '只提取正文引用，代码块内示例应跳过')
+})
+
 test('extractContractRefs：锚点命中已知契约才是强引用', () => {
   const text = '见 [[数据指标口径#interaction-rate]] 和 [[其他页]] 与 [[页#普通锚点]]'
   const refs = extractContractRefs(text, new Set(['interaction-rate']))
