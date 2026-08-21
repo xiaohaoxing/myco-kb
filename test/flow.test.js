@@ -36,11 +36,12 @@ test('extractWikiRefs：代码块内的引用不提取（示例不算依赖）',
   const md = [
     '正文见 [[数据指标口径#interaction-rate]]',
     '```markdown',
+    '代码块内示例 [[数据指标口径#interaction-rate]] 不应提取',
     ':::contract id:interaction-rate version:3',
     '内容',
     ':::',
     '```',
-    '代码块内示例 [[数据指标口径#interaction-rate]] 不应提取',
+    '代码块已闭合',
   ].join('\n')
   const refs = extractContractRefs(md, new Set(['interaction-rate']))
   assert.equal(refs.length, 1, '只提取正文引用，代码块内示例应跳过')
