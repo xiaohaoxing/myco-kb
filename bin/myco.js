@@ -152,6 +152,18 @@ async function main() {
             console.log(`✗ ${item.name}: ${item.error}${item.stage ? `（失败于 ${item.stage}）` : ''}`)
           }
         }
+        // sync 后自动变更检测（pull 的新内容立即进事件流，与 daemon 行为一致）
+        const events = myco.scanChanges()
+        if (events.length > 0) {
+          console.log('--- 变更检测（pull 新内容）---')
+          for (const e of events) console.log(`#${e.id} [${e.bump}] ${e.packageId}/${e.rel}${e.contractId ? `  契约:${e.contractId}` : ''}`)
+          for (const e of events) {
+            if (e.bump === 'major') {
+              const r2 = await myco.impact(e.id)
+              if (r2.spread.length > 0 || r2.pkgSpread.length > 0) console.log(`→ 事件 #${e.id} 已标 stale（待确认），\`myco stale\` 查看`)
+            }
+          }
+        }
         return
       }
       throw new Error(`未知子命令: ${sub}`)
