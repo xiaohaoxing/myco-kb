@@ -65,7 +65,7 @@ scripts/install-profile.sh   # 安装进 ~/.dsh/profiles/web（重启 Harness �
 
 ## 路线
 
-v0.1 CLI ✅ → v0.2 控制台 tab + 远程服务 + daemon 宿主化 ✅ → **v0.3 云端 git 同步 ✅** → v0.4 按任务动态装配 profile/工具 → **v0.5 知识更新流（染色/传播）数据层 ✅**（契约解析 / 变更检测 / 影响分析 / stale 队列，全链路实测）→ v0.5.1 控制台染色/传播视图 ✅（变更事件区 + 传播队列区 + 影响分析动作 + 契约清单 API）→ subagent 调度 + webhook。
+v0.1 CLI ✅ → v0.2 控制台 tab + 远程服务 + daemon 宿主化 ✅ → **v0.3 云端 git 同步 ✅** → v0.4 按任务动态装配 profile/工具 → **v0.5 知识更新流（染色/传播）数据层 ✅**（契约解析 / 变更检测 / 影响分析 / stale 队列，全链路实测）→ v0.5.1 控制台染色/传播视图 ✅（变更事件区 + 传播队列区 + 影响分析动作 + 契约清单 API）→ webhook 通知 ✅（设置页可配 URL，major 契约变更自动推送）→ subagent 调度。
 
 ## v0.3 云端 git 同步（已完成）
 
@@ -87,7 +87,8 @@ v0.1 CLI ✅ → v0.2 控制台 tab + 远程服务 + daemon 宿主化 ✅ → **
 - `lib/core/store.js`：node:sqlite（events append-only / stale 注册表 / hashes 缓存）
 - `lib/core/impact.js`：`buildContractIndex`（两遍扫描）→ `analyzeImpact`（同包=染色，跨包=传播，kb.yaml dependencies 反向=依赖传播）
 - daemon：维护周期自动变更检测，major 事件自动影响分析标 stale（待人工确认）
-- CLI：`scan / events / impact <id> / stale [clear] / contracts`
+- CLI：`scan / events / impact <id> / stale [clear] / contracts / webhook set|show|test`
+- **webhook 通知**：配置存 `config.json.webhook.url`（设置页/CLI 可配）；`sendWebhook` POST 飞书兼容格式 JSON；daemon 对 major 事件自动 `impact` + `notifyMajor` 推送（染色/传播摘要），patch/minor 不打扰；API `/myco/api/webhook` GET（URL 脱敏）/POST（设置）/test
 
 （原有设计说明保留）
 

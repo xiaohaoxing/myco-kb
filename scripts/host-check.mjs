@@ -95,6 +95,10 @@ async function verifyHostPlane() {
   const cts = await call('/myco/api/contracts')
   assert.equal(cts.status, 200)
   assert.ok(Array.isArray(cts.payload))
+  const wh = await call('/myco/api/webhook')
+  assert.equal(wh.status, 200)
+  assert.ok('enabled' in wh.payload)
+  assert.ok('url' in wh.payload)
   const nf = await call('/myco/api/nothing')
   assert.equal(nf.status, 404)
 

@@ -138,3 +138,37 @@ test('MycoStore：事件日志 append-only + stale 注册表', () => {
   assert.equal(store.listStale().length, 0)
   store.close()
 })
+
+test('webhook：配置读写 + 通知文案 + 发送（mock fetch）', async () => {
+  const { Myco } = await import('../lib/core/myco.js')
+  const myco = new Myco({ dataDir: mkdtempSync(join(tmpdir(), 'myco-wh-')) })
+  assert.equal(myco.getWebhook().enabled, false)
+
+  myco.setWebhook('https://open.feishu.cn/open-apis/bot/v2/hook/testkey')
+  assert.equal(myco.getWebhook().enabled, true)
+
+  let posted = null
+  globalThis.fetch = async (url, opts) => {
+    posted = { url, body: JSON.parse(opts.body) }
+    return { ok: true, status: 200 }
+  }
+  try {
+    const r = await myco.sendWebhook('测试')
+    assert.ok(r.ok)
+    assert.equal(posted.url, 'https://open.feishu.cn/open-apis/bot/v2/hook/testkey')
+    assert.equal(posted.body.msg_type, 'text')
+
+    const evt = { packageId: 'A', rel: 'c.md', contractId: 'x-rate', bump: 'major' }
+    const impactResult = { dye: [{ packageId: 'A', rel: 'd.md' }], spread: [{ packageId: 'B', rel: 'e.md' }], pkgSpread: [] }
+    await myco.notifyMajor(evt, impactResult)
+    const text = posted.body.content.text
+    assert.ok(text.includes('契约: x-rate'), text)
+    assert.ok(text.includes('染色: 1 页  传播: 1 页'), text)
+    assert.ok(text.includes('受影响: B'), text)
+  } finally {
+    delete globalThis.fetch
+  }
+
+  myco.setWebhook('')
+  assert.equal(myco.getWebhook().enabled, false)
+})

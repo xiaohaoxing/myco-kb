@@ -30,6 +30,9 @@ function usage() {
   myco stale                列出 stale（待确认受影响节点）
   myco stale clear <node>   确认解除 stale
   myco contracts            列出全库契约块
+  myco webhook set <url>    设置 webhook url（留空 = 清除）
+  myco webhook show         显示当前配置
+  myco webhook test         发送测试消息
   myco daemon               前台运行守护（watcher + 定时维护 + 云同步）
   myco install-skills       安装 skills/ 到 ~/.agents/skills/
 
@@ -192,6 +195,25 @@ async function main() {
       if (cs.length === 0) { console.log('无契约块'); return }
       for (const c of cs) console.log(`${c.packageId}/${c.rel}  ${c.id} v${c.version}  ${c.content.slice(0, 40)}`)
       return
+    }
+    case 'webhook': {
+      const sub = args[0]
+      if (sub === 'set') {
+        myco.setWebhook(args[1] ?? '')
+        console.log(args[1] ? '✓ 已设置 webhook url' : '✓ 已清除 webhook url')
+        return
+      }
+      if (sub === 'show' || sub === undefined) {
+        const w = myco.getWebhook()
+        console.log(w.enabled ? `enabled: ${w.url}` : '未配置 webhook（major 契约变更将不推送）')
+        return
+      }
+      if (sub === 'test') {
+        const r = await myco.sendWebhook('【MyCo-KB】测试消息：webhook 配置正常')
+        console.log(r.ok ? `✓ 发送成功（HTTP ${r.status}）` : `✗ 发送失败：${r.reason ?? r.status}`)
+        return
+      }
+      throw new Error(`未知子命令: ${sub}`)
     }
     case 'daemon': {
       myco.daemon()
