@@ -84,6 +84,17 @@ scripts/install-profile.sh   # 符号链接进 ~/.dsh/profiles/web + 声明依�
 **重启 Harness 后生效**：插件管理页 Plugins 设置区出现 MyCo-KB 控制台 tab；
 daemon 静默监听两个知识包，变更自动增量索引。
 
+## 官方网站
+
+`site/` 目录是产品官网（VitePress）：产品特性 + 系统设计 + 用户文档三件套。
+
+```bash
+cd site
+npm install
+npm run dev      # 本地开发 http://localhost:4173
+npm run build    # 静态产物 .vitepress/dist/，可部署到任意静态托管
+```
+
 ## 已知边界（实测结论）
 
 - `dsh-schedule` 是 **agent-scoped**（只在 live 根 agent 上装提醒工具），不适合宿主平面守护；

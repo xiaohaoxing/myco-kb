@@ -1,0 +1,15 @@
+{
+  "name": "myco-kb-site",
+  "version": "0.3.0",
+  "private": true,
+  "description": "MyCo-KB 官方网站：产品特性 + 系统设计 + 用户文档（VitePress）",
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev . --port 4173",
+    "build": "vitepress build .",
+    "preview": "vitepress preview . --port 4173"
+  },
+  "devDependencies": {
+    "vitepress": "^1.6.3"
+  }
+}
