@@ -22,9 +22,10 @@ DEFAULT_PROFILE="$HOME/.dsh/profiles/web"
 
 usage() {
   echo "用法："
-  echo "  bash scripts/install-release.sh install <tarball> [profile]"
-  echo "  bash scripts/install-release.sh rollback [profile]"
-  echo "  bash scripts/install-release.sh list [profile]"
+  echo "  bash scripts/install-release.sh install <tarball> [profile]   # 安装 / 升级到某制品版本（file 依赖/版本化）"
+  echo "  bash scripts/install-release.sh git <ref> [profile]          # 改为 git 依赖安装（供 DSH 插件管理在线更新）"
+  echo "  bash scripts/install-release.sh rollback [profile]           # 回滚到上一个版本"
+  echo "  bash scripts/install-release.sh list [profile]               # 列出已安装版本"
   exit 1
 }
 
@@ -276,6 +277,44 @@ do_list() {
   done
 }
 
+# git 依赖安装（供 DSH 插件管理在线更新）：
+# 把依赖写成 github:xiaohaoxing/myco-kb#<ref>，DSH 会将其识别为「可从 git 更新的插件」，
+# 仓库打新 tag（如 v0.7.0）后，插件管理页会出现「更新」按钮，点一下即在线更新到新 tag。
+do_git_install() {
+  local ref="$1"
+  if [ -z "$ref" ]; then
+    echo "✗ 用法: install-release.sh git <ref>（如 v0.6.0 / main / <commit>）" >&2
+    exit 1
+  fi
+  if [ ! -f "$PROFILE/package.json" ]; then
+    echo "✗ profile 没有 package.json：$PROFILE" >&2
+    exit 1
+  fi
+  local dep="github:xiaohaoxing/myco-kb#${ref}"
+  python3 - "$PROFILE/package.json" "$dep" <<'PYJSON'
+import json, sys
+pkg_path, dep = sys.argv[1], sys.argv[2]
+with open(pkg_path, encoding='utf8') as f:
+    pkg = json.load(f)
+deps = pkg.setdefault('dependencies', {})
+deps['@dsh/myco-kb'] = dep
+bundles = pkg.setdefault('dsh', {}).setdefault('profile', {}).setdefault('bundles', [])
+if '@dsh/myco-kb' not in bundles:
+    bundles.append('@dsh/myco-kb')
+with open(pkg_path, 'w', encoding='utf8') as f:
+    json.dump(pkg, f, ensure_ascii=False, indent=2)
+    f.write('\n')
+print('✓ 已写入依赖 @dsh/myco-kb -> ' + dep)
+PYJSON
+  echo
+  echo "✅ 已切换为 git 依赖（DSH 插件管理可在线更新）：@dsh/myco-kb -> github:xiaohaoxing/myco-kb#${ref}"
+  echo "   说明：DSH 会把该插件识别为「可从 git 更新的插件」。"
+  echo "   下一步："
+  echo "     1) 重启 DeepSeek Harness（DSH 解析 git 依赖并装载插件）；"
+  echo "     2) 之后仓库打新 tag（如 v0.7.0）并发布，插件管理页会出现「更新」，点一下即在线更新。"
+  echo "   （可选）不重启立即解析：进入 ${PROFILE} 执行 pnpm install"
+}
+
 CMD="${1:-help}"
 
 case "$CMD" in
@@ -284,6 +323,11 @@ case "$CMD" in
     PROFILE="$(read_profile "${3:-$DEFAULT_PROFILE}")"
     DEST="$PROFILE/node_modules/@dsh/myco-kb"
     do_install "$2"
+    ;;
+  git)
+    PROFILE="$(read_profile "${3:-$DEFAULT_PROFILE}")"
+    DEST="$PROFILE/node_modules/@dsh/myco-kb"
+    do_git_install "$2"
     ;;
   rollback)
     PROFILE="$(read_profile "${2:-$DEFAULT_PROFILE}")"

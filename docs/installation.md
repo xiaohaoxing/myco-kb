@@ -99,6 +99,29 @@ bash myco-install-0.6.0.sh list                   # 列出已装版本（* = 当
 
 ---
 
+## DSH 插件管理在线更新（git 依赖）
+
+> 与「自包含安装器 / `myco upgrade`」并列的另一种更新路径：把插件装成 **git URL 依赖**，DSH 插件管理就能像更新 dsh-remote 那样**在线更新**。
+
+```bash
+# 把依赖切换为 git URL（DSH 识别为「可从 git 更新」的插件）
+bash scripts/install-release.sh git v0.6.0          # 默认 profile ~/.dsh/profiles/web
+# 或指定 profile： bash scripts/install-release.sh git v0.6.0 <profile>
+```
+
+这会把 profile `package.json` 里写成：
+
+```json
+"@dsh/myco-kb": "github:xiaohaoxing/myco-kb#v0.6.0"
+```
+
+- **生效**：重启 DeepSeek Harness，DSH 解析 git 依赖并装载插件。
+- **在线更新**：之后仓库打新 tag（如 `v0.7.0`）并发布，**插件管理页会出现「更新」**，点一下即在线更新到新 tag（DSH 自动把依赖 ref 升到新 tag）。
+- **前提**：MyCo-KB 仓库须是标准 DSH bundle（已满足：`cordis.patch.yml` + `dsh.bundle.patch`），发布用 `v*` tag（`build-release.sh` + `gh release create v0.x.0` 已形成此流程）。
+- 手动退回制品/版本化安装：`bash scripts/install-release.sh install dist/dsh-myco-kb-<version>.tgz`。
+
+> 两者可并存：企业环境可用自包含安装器 + `myco upgrade`（自包含、可回滚）；也可用 git 依赖让 DSH 插件管理在线更新。
+
 ## `myco` 命令自动可用
 
 `install-release.sh` 会生成 `~/.local/bin/myco` 启动器（用解析到的 node 指向当前 profile 的插件 CLI，跟随版本符号链接，升级/回滚后仍指向正确版本）。
