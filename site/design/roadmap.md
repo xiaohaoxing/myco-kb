@@ -29,6 +29,36 @@
 
 </div>
 
+## 版本发布（自 0.5.0 起 npm 版本 = 功能里程碑）
+
+<div class="roadmap">
+
+<div class="rm-item done">
+  <h3><span class="rm-tag done">DONE</span>0.5.0 —— 产品化交付基线</h3>
+  <p>首个 productized 版本：把 v0.1–v0.5 全部功能统一打包（知识包模型 / 组合 profile / 生命周期 / 插件形态 / 云端同步 / 知识更新流），并补齐产品化交付前提（打包 / 安装脚本 / 发布构建 / 企业 Cookbook）。</p>
+</div>
+
+<div class="rm-item done">
+  <h3><span class="rm-tag done">DONE</span>0.6.0 —— 聚合遥测 + 自动更新</h3>
+  <p>严格匿名 opt-in 聚合遥测（PostHog / generic）+ <code>myco upgrade</code> 自动更新（sha256 校验、可回滚）+ GitHub Pages 官网自动发布。</p>
+</div>
+
+<div class="rm-item done">
+  <h3><span class="rm-tag done">DONE</span>0.7.0 —— v0.4 按任务动态装配</h3>
+  <p>数据面 <code>myco assemble &lt;goal&gt;</code> + 知识包子集软匹配 + 可复现 lockfile；工具面 <code>myco_assemble</code> + agent 作用域 scoped 检索注入；控制台「按任务动态装配」视图。</p>
+</div>
+
+<div class="rm-item done">
+  <h3><span class="rm-tag done">DONE</span>0.7.1 —— 公开内容脱敏</h3>
+  <p>清理公开仓库 / 官网 / 制品中的内部与敏感信息：移除内置 PostHog apiKey、内部命名与内网地址占位化、代码停用词去公司专属词、文案与开发细节中性化。</p>
+</div>
+
+</div>
+
+## 后续方向
+
+- 知识更新流深化、多用户协作。
+
 ## 设计原则（贯穿所有版本）
 
 - **文件是唯一事实源**，一切缓存可重建；
