@@ -1,10 +1,39 @@
 #!/usr/bin/env node
-import { homedir } from 'node:os'
+import { readFileSync, writeFileSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
+import { createInterface } from 'node:readline'
+import { homedir, tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { Myco } from '../lib/core/myco.js'
+import { latestRelease, isNewer, findInstallerAsset, findShaAsset, download, checkSha256 } from '../lib/upgrade.js'
 
 const dataDir = process.env.MYCO_DATA ?? join(homedir(), '.myco')
 const [cmd, ...args] = process.argv.slice(2)
+
+// 当前已安装版本：优先取 DSH profile 版本化安装的 .active，否则回退到本包版本
+function installedVersion() {
+  const profile = process.env.DSH_PROFILE ?? join(homedir(), '.dsh', 'profiles', 'web')
+  const active = join(profile, 'node_modules', '@dsh', '.myco-kb-versions', '.active')
+  try {
+    const v = readFileSync(active, 'utf8').trim()
+    if (v) return v
+  } catch { /* 非版本化安装（dev 符号链接）则回退 */ }
+  try {
+    return JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version
+  } catch {
+    return '0.0.0'
+  }
+}
+
+function askYN(question) {
+  return new Promise((resolve) => {
+    const rl = createInterface({ input: process.stdin, output: process.stdout })
+    rl.question(`${question} [y/N] `, (ans) => {
+      rl.close()
+      resolve(/^y(es)?$/i.test(ans.trim()))
+    })
+  })
+}
 
 function usage() {
   console.log(`myco — MyCo-KB 知识库管理器
@@ -44,6 +73,7 @@ function usage() {
   myco telemetry set <url>  设置上报 url（未配置 url 不发送；设置后才定时上报）
   myco telemetry on/off     启用/关闭聚合遥测（MYCO_TELEMETRY=0 整机禁用）
   myco telemetry now        立即上报一次（配置校验）
+  myco upgrade              检查 GitHub Releases 最新版并自动升级（--yes 跳过确认）
   myco daemon               前台运行守护（watcher + 定时维护 + 云同步 + 定时遥测）
   myco install-skills       安装 skills/ 到 ~/.agents/skills/
 
@@ -338,6 +368,49 @@ async function main() {
         return
       }
       throw new Error(`未知子命令: ${sub}`)
+    }
+    case 'upgrade': {
+      const repo = process.env.MYCO_UPGRADE_REPO || 'xiaohaoxing/myco-kb'
+      let release
+      try {
+        release = await latestRelease({ repo })
+      } catch (err) {
+        throw new Error(`无法检查更新：${err?.message ?? err}（确保仓库可公开访问：${repo}）`)
+      }
+      const current = installedVersion()
+      if (!isNewer(release.version, current)) {
+        console.log(`已是最新：v${current}（最新发布 v${release.version}）`)
+        return
+      }
+      console.log(`发现新版本 v${release.version}（当前 v${current}）`)
+      const asset = findInstallerAsset(release.assets, release.version)
+      if (!asset) {
+        throw new Error(`发布版缺少自包含安装器资产：myco-install-${release.version}.sh（请在 GitHub Releases 上传它）`)
+      }
+      const noConfirm = args.includes('--yes') || process.env.MYCO_UPGRADE_YES === '1'
+      if (!noConfirm) {
+        const ok = await askYN(`下载并升级到 v${release.version}？`)
+        if (!ok) { console.log('已取消'); return }
+      }
+      console.log('正在下载自包含安装器…')
+      const installer = await download(asset.url)
+      const sha = findShaAsset(release.assets, release.version)
+      if (sha) {
+        const expected = (await download(sha.url)).toString('utf8')
+        if (!checkSha256(installer, expected)) {
+          throw new Error('sha256 校验失败，已中止（请勿运行被篡改的安装器；可从发布页手动下载核对）')
+        }
+        console.log('✓ sha256 校验通过')
+      } else {
+        console.log('（发布版未附带 .sha256，跳过校验；建议上传以防篡改）')
+      }
+      const tmp = join(tmpdir(), `myco-install-${release.version}.sh`)
+      writeFileSync(tmp, installer)
+      console.log('正在执行安装器（版本化安装，保留旧版本可回滚）…')
+      execFileSync('bash', [tmp], { stdio: 'inherit' })
+      console.log(`✅ 已升级到 v${release.version}`)
+      console.log('  重启 DeepSeek Harness 后生效（服务端插件代码在启动时加载；控制台刷新即可见新 UI）。')
+      return
     }
     case 'daemon': {
       myco.daemon()

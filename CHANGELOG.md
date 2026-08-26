@@ -4,20 +4,23 @@ MyCo-KB 的版本遵循语义化版本（semver）。本文记录每个 npm 发�
 
 > **版本与里程碑的对应**：项目内的 v0.x 功能里程碑（roadmap）与 npm 包版本（semver）历史上不同步——功能里程碑在 `0.1.0` 下持续累积交付。**自 `0.5.0` 起对齐**：npm 包版本 = 该发布所包含的最终功能里程碑。首个产品化交付版本即把包含到 v0.5 的全部功能，统一标为 `0.5.0`。
 
-## [0.6.0] - 聚合遥测（未发布）
+## [0.6.0] - 聚合遥测 + 自动更新
 
-> 作为首个产品化交付基线的追加能力，代码已就绪，尚未单独发版（当前 `package.json` 仍为 `0.5.0`）。
+> 版本对齐：0.6.0（productized 基线在 0.5.0 基础上追加 telemetry + 自动更新）。
 
 ### 新增
 - **聚合遥测**：daemon 定时上报**严格匿名聚合统计**（版本/平台/包数/文档数/tag 数/挂载与订阅数/运行状态），**不含任何知识内容、包 id/名称、文件名、tag 名称、IP**。
   - **opt-in（默认关）**：控制台底部「统计共享」勾选 / `myco telemetry on` 才上报；未启用不上报任何数据。
-  - **护栏**：需配置上报 `url`（`cordis.patch.yml` 的 `telemetry.url`）才真正发送；未配置则勾选也不上报。
+  - **provider**：`generic`（原始聚合 JSON）或 `posthog`（PostHog 单事件 `/i/v0/e/`，`api_key`/`distinct_id`(匿名 uuid)/`properties`）。
+  - **护栏**：需配置上报 `url`（`cordis.patch.yml` 的 `telemetry.url`）才真正发送；未配置则勾选也不上报。apiKey 支持 `telemetry.apiKey` 或环境变量 `POSTHOG_API_KEY`。
   - **控制**：CLI `myco telemetry status|set <url>|on|off|now`；API `/myco/api/telemetry`；`MYCO_TELEMETRY=0` 整机禁用；`intervalHours` 默认 24h。
-  - **设置页**：控制台底部「统计共享」勾选 + 「相关链接」（开源源码 / 站点文档 / 个人站点，`cordis.patch.yml` 的 `links` 配置）。
-  - **文档**：`docs/telemetry.md`（范围/护栏/合规）、官网 `site/docs/telemetry.md`（公开隐私与遥测说明）。
-  - 单测：`test/telemetry.test.js`（匿名性/上报/间隔门控/默认关与 kill switch）。
+  - **设置页**：控制台底部「统计共享」勾选 +「立即上报」+「相关链接」（开源源码/站点文档/个人站点，`cordis.patch.yml` 的 `links`）。
+- **自动更新 `myco upgrade`**：查询 GitHub Releases 最新版 → 下载 `myco-install-<version>.sh` → 校验 sha256（若有 `.sha256` 资产）→ 版本化安装 → 提示重启生效。命令行 `myco upgrade [--yes]`。
+- **官网**：新增公开「隐私与遥测」页；首页 raw HTML 内部链接补 `base`（修复快速开始 404）。
+- **文档**：`docs/telemetry.md`（范围/护栏/合规/PostHog）、官网 `site/docs/telemetry.md`。
+- 单测：`test/telemetry.test.js`（匿名性/上报/间隔/默认关/PostHog payload）、`test/upgrade.test.js`（版本比较/资产解析/校验）。
 
-> 合规提示：本机制为**默认关 opt-in**（勾选才上报）+ 需配置 `url` 才发送；若面向要求「零回传」的企业客户，保持默认不勾选即可，或 `myco telemetry off` / `MYCO_TELEMETRY=0` 彻底关闭。
+> 合规：遥测为**默认关 opt-in** + 需配置 `url` 才发送；面向要求「零回传」的企业客户，保持不勾选或 `myco telemetry off` / `MYCO_TELEMETRY=0` 即可。
 
 ## [0.5.0] - 首个产品化交付版本
 
