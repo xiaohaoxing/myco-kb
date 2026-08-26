@@ -14,6 +14,9 @@
 
 ## 快速开始
 
+> 从零把 MyCo-KB 装到一台设备的 DSH 上，走**产品化安装**（一个自包含文件）：见 [安装指导](/docs/installation.md)。
+> 以下命令假设 `myco` 已安装且知识库已初始化。
+
 ```bash
 myco mount repo:/path/to/your-kb   # 挂载知识根
 myco index                         # 重建跨包索引
@@ -52,7 +55,9 @@ skills/           myco-search / myco-maintain / myco-lifecycle
 scripts/
   dev-links.sh       本地开发依赖符号链接（指向 DSH 安装目录）
   host-check.mjs     宿主平面加载验证（独立进程）
-  install-profile.sh 安装到 ~/.dsh/profiles/web
+  install-profile.sh 开发用：符号链接仓库进 ~/.dsh/profiles/web
+  build-release.sh   产品化发布构建（check + test + pack + 校验 + sha256）
+  install-release.sh 产品化安装/升级/回滚（版本化，自动生成 myco 命令）
 test/             node:test 单测（核心模块）
 ```
 
@@ -71,6 +76,8 @@ npm run test:host # 宿主平面验证（真实 Cordis：服务/工具/daemon/re
 Cordis 纤维在 node:test 的 async context 下不会 apply（已实测确认的环境不兼容）。
 
 ### 安装进 Harness（静默常驻）—— 已执行（2026-08-19）
+
+> 这是**开发者本机的开发安装说明**（符号链接到源码仓库）。**给新设备请走产品化安装**，见[安装指导](/docs/installation)。
 
 ```bash
 scripts/install-profile.sh   # 符号链接进 ~/.dsh/profiles/web + 声明依赖（幂等）
@@ -95,10 +102,28 @@ npm run dev      # 本地开发 http://localhost:4173
 npm run build    # 静态产物 .vitepress/dist/，可部署到任意静态托管
 ```
 
+## 产品化交付
+
+> 面向企业交付项目知识/文档/经验沉淀底座的手册见 [企业交付 Cookbook](/docs/enterprise-delivery-cookbook.md)。
+
+- **版本**：npm 包版本**自 `0.5.0` 起与功能里程碑对齐**（首个产品化交付版本，包含 v0.1～v0.5 全部功能）。变更见 [CHANGELOG](/CHANGELOG.md)。
+- **Node 前提**：更新流用到 `node:sqlite`（`DatabaseSync`），需要 **Node ≥ 23，推荐 24**（`package.json` `engines` 已对齐；Node 18/20 会在更新流路径崩溃）。基础 CLI 命令在更新流之外可在更低版本工作，但完整功能需上述版本。
+- **发布构建**：`npm run build:release`（= `bash scripts/build-release.sh`）——语法检查 → 单元测试 → 打包 → 校验产物关键文件 → sha256，产物 `dist/dsh-myco-kb-<version>.tgz`。
+- **自包含安装器**：`build-release.sh` 额外产出 `dist/myco-install-<version>.sh`（**一个文件**内含安装器 + 制品 base64）。新设备只需拷这一个文件即可**安装 / 升级 / 回滚 / 查看**：
+  ```bash
+  bash myco-install-0.5.0.sh [profile]            # 安装（默认 profile ~/.dsh/profiles/web）
+  bash myco-install-0.5.0.sh rollback [profile]   # 回滚
+  bash myco-install-0.5.0.sh list [profile]       # 查看已装版本
+  ```
+  它：① 解出制品 tarball ② 执行 `install-release.sh install` ③ 生成可直接用的 `myco` 命令。
+- **制品安装/升级/回滚**：`bash scripts/install-release.sh install dist/dsh-myco-kb-<version>.tgz [profile]`（替代开发用符号链接 `install-profile.sh`）；支持 `rollback` / `list`。默认 profile `~/.dsh/profiles/web`。
+- **`myco` 命令自动可用**：`install-release.sh` 会生成 `~/.local/bin/myco` 启动器（用 DSH 工具链 node 指向当前 profile 的插件 CLI，跟随版本符号链接）。若该目录不在 PATH，默认在 shell rc（`~/.zshrc` 优先）写入带标记的 `export PATH` 块（幂等、可逆）；设 `MYCO_NO_PATH=1` 可跳过（仅生成启动器并打印提示）。
+- **制品需包含 `cordis.patch.yml`**（插件 bundle 入口）——`files` 字段已包含并打包校验。
+
 ## 已知边界（实测结论）
 
 - `dsh-schedule` 是 **agent-scoped**（只在 live 根 agent 上装提醒工具），不适合宿主平面守护；
   宿主平面维护用 Cordis 插件自身 `setInterval` + 文件 watcher（已实现）。
 - 控制台挂在插件管理页 `settings.plugins.tab` slot（与 plugin-inventory 同槽）。
 
-进度：v0.1 CLI ✅；v0.2 控制台 tab + 远程服务 + daemon 宿主化 ✅；**v0.3 云端 git 同步 ✅**（clone/pull/push/冲突报告，全流程实测）；v0.4 动态装配；v0.5 知识更新流。
+进度：v0.1 CLI ✅；v0.2 控制台 tab + 远程服务 + daemon 宿主化 ✅；**v0.3 云端 git 同步 ✅**（clone/pull/push/冲突报告，全流程实测）；v0.4 动态装配（规划中）；v0.5 知识更新流 ✅；**产品化交付（0.5.0）：发布/安装/回滚脚本 + 企业 Cookbook ✅**。

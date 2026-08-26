@@ -1,6 +1,6 @@
 {
   "name": "@dsh/myco-kb",
-  "version": "0.1.0",
+  "version": "0.5.0",
   "description": "MyCo-KB — knowledge base management plugin for the DeepSeek Harness: knowledge packages, combination profiles, lifecycle promotion/archival, silent background maintenance, local repo / local global / cloud global management.",
   "type": "module",
   "main": "lib/index.js",
@@ -17,13 +17,16 @@
     "lib",
     "bin",
     "skills",
+    "cordis.patch.yml",
     "README.md"
   ],
   "scripts": {
-    "test": "node --test",
+    "test": "node --test --test-timeout=30000",
     "test:host": "node scripts/host-check.mjs",
     "check": "node --check bin/myco.js && node --check lib/index.js && node --check lib/remote.js && node --check lib/tools.js && node --check lib/daemon.js && node --check lib/client.js && node --check lib/core/*.js",
-    "links": "bash scripts/dev-links.sh"
+    "links": "bash scripts/dev-links.sh",
+    "build:release": "bash scripts/build-release.sh",
+    "install:release": "bash scripts/install-release.sh"
   },
   "dsh": {
     "bundle": {
@@ -50,7 +53,7 @@
     "@deepseek-ai/dsh-typert-protocol": "^0.1.0-rc.6"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=23.0.0"
   },
   "license": "MIT"
 }

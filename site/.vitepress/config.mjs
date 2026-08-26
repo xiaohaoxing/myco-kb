@@ -2,6 +2,7 @@ import { defineConfig } from 'vitepress'
 
 const guides = [
   { text: '快速开始', link: '/docs/quickstart' },
+  { text: '安装指导', link: '/docs/installation' },
   { text: 'CLI 命令参考', link: '/docs/cli' },
   { text: '知识包与挂载', link: '/docs/packages' },
   { text: '组合配置 Profiles', link: '/docs/profiles' },
@@ -23,6 +24,7 @@ const design = [
 ]
 
 export default defineConfig({
+  base: process.env.MYCO_BASE || '/',
   title: 'MyCo-KB',
   description: 'MyCo-KB —— 面向 DeepSeek Harness 的知识库管理系统：知识包 / 组合配置 / 生命周期 / 跨包检索 / 云端同步 / 知识更新流',
   lang: 'zh-CN',

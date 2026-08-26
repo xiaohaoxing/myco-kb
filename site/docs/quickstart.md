@@ -1,17 +1,21 @@
 # 快速开始
 
 MyCo-KB 以 **DeepSeek Harness 插件**形态运行，同时提供独立的 `myco` CLI。五步走完核心链路。
+> 装到新设备的标准手册见[安装指导](/docs/installation)。
 
 ## 1. 安装
 
-```bash
-# 从源码仓库安装（本地开发）
-npm run links      # 先建本地依赖符号链接（scripts/dev-links.sh）
-npm run check      # 语法检查
+**前提：Node ≥ 23（推荐 24）**——更新流用 `node:sqlite`。
 
-# 安装进 Harness（静默常驻，重启 Harness 生效）
-scripts/install-profile.sh
+```bash
+# ★ 产品化安装（推荐）：一个自包含文件，拷到设备直接装
+#   开发机先构建：bash scripts/build-release.sh   → dist/myco-install-<version>.sh
+bash myco-install-0.5.0.sh [profile]     # 默认 profile ~/.dsh/profiles/web
+# 装完自动生成可直接用的 myco 命令；升级 install <新制品> / 回滚 rollback / 查看 list
 ```
+
+- 不想用自包含文件时：制品 tarball + 脚本 `bash scripts/install-release.sh install dist/dsh-myco-kb-<version>.tgz`。
+- **开发机/源码安装**（仅开发者自己机器）：`npm run links && npm run check && scripts/install-profile.sh`，再重启 DSH。
 
 数据目录默认 `~/.myco`，可用环境变量覆盖：
 

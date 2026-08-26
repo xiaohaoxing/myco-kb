@@ -1,0 +1,68 @@
+name: Deploy site to GitHub Pages
+
+# 触发：push 到 main，或手动运行
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同一时间只跑一个 Pages 构建，多个并发时取消进行中的
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Install deps
+        working-directory: site
+        run: npm install
+
+      # 计算 VitePress base：项目仓库 = /<repo>/；用户/组织主页（<owner>.github.io）= /
+      - name: Build
+        working-directory: site
+        shell: bash
+        run: |
+          REPO="${{ github.event.repository.name }}"
+          OWNER="${{ github.repository_owner }}"
+          if [ "$REPO" = "$OWNER.github.io" ]; then BASE="/"; else BASE="/$REPO/"; fi
+          echo "MYCO_BASE=$BASE"
+          MYCO_BASE="$BASE" npm run build
+
+      - name: Add .nojekyll
+        run: touch site/.vitepress/dist/.nojekyll
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site/.vitepress/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
