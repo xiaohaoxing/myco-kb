@@ -10,7 +10,7 @@ MyCo-KB 以 **DeepSeek Harness 插件**形态运行，同时提供独立的 `myc
 ```bash
 # ★ 产品化安装（推荐）：一个自包含文件，拷到设备直接装
 #   开发机先构建：bash scripts/build-release.sh   → dist/myco-install-<version>.sh
-bash myco-install-0.7.0.sh [profile]     # 默认 profile ~/.dsh/profiles/web
+bash myco-install-0.7.1.sh [profile]     # 默认 profile ~/.dsh/profiles/web
 # 装完自动生成可直接用的 myco 命令；升级 install <新制品> / 回滚 rollback / 查看 list
 ```
 

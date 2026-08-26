@@ -91,7 +91,7 @@ layout: home
     <div class="stat"><div class="n">2</div><div class="l">知识包</div></div>
     <div class="stat"><div class="n">21</div><div class="l">篇文档</div></div>
     <div class="stat"><div class="n">19</div><div class="l">个 tag</div></div>
-    <div class="stat"><div class="n">v0.7.0</div><div class="l">当前版本</div></div>
+    <div class="stat"><div class="n">v0.7.1</div><div class="l">当前版本</div></div>
   </div>
 </div>
 

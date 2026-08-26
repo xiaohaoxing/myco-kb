@@ -27,29 +27,29 @@ Node 校验也可以交给安装器：`install-release.sh` 启动时会检查 No
 ```bash
 cd /path/to/myco-kb
 bash scripts/build-release.sh        # 产出：
-#   dist/dsh-myco-kb-0.7.0.tgz       制品 tarball（+ .sha256）
-#   dist/myco-install-0.7.0.sh       ★ 自包含安装器（内含安装器 + 制品 base64，+ .sha256）
+#   dist/dsh-myco-kb-0.7.1.tgz       制品 tarball（+ .sha256）
+#   dist/myco-install-0.7.1.sh       ★ 自包含安装器（内含安装器 + 制品 base64，+ .sha256）
 ```
 
 ### A2. 把自包含安装器拷到新设备
 ```bash
-scp dist/myco-install-0.7.0.sh user@new-device:/tmp/      # 或 U盘 / git 分发（选一种）
+scp dist/myco-install-0.7.1.sh user@new-device:/tmp/      # 或 U盘 / git 分发（选一种）
 ```
 
 ### A3. 在新设备上运行（一条命令装完）
 ```bash
 cd /tmp
 node -v                              # 确认 ≥ 23（安装器也会再校验）
-bash myco-install-0.7.0.sh [profile] # 默认 profile ~/.dsh/profiles/web
+bash myco-install-0.7.1.sh [profile] # 默认 profile ~/.dsh/profiles/web
 ```
 它会自动：① 解出制品 tarball → ② 执行 `install-release.sh install`（版本化安装 + 依赖声明 + `dsh.profile.bundles`）→ ③ 生成可直接用的 `myco` 命令。
 
 **这个文件就是完整的安装工具**（含升级/回滚/查看），无需其它脚本：
 ```bash
-bash myco-install-0.7.0.sh [profile]            # 安装
-bash myco-install-0.7.0.sh install [profile]    # 同安装
-bash myco-install-0.7.0.sh rollback [profile]   # 回滚到上一个版本
-bash myco-install-0.7.0.sh list [profile]       # 列出已装版本（* = 当前活动）
+bash myco-install-0.7.1.sh [profile]            # 安装
+bash myco-install-0.7.1.sh install [profile]    # 同安装
+bash myco-install-0.7.1.sh rollback [profile]   # 回滚到上一个版本
+bash myco-install-0.7.1.sh list [profile]       # 列出已装版本（* = 当前活动）
 ```
 
 ### A4. 初始化 + 验证
@@ -87,8 +87,8 @@ bash scripts/install-release.sh install ./dsh-myco-kb-<version>.tgz [profile]
 ```bash
 # 升级：拿到新的 myco-install-<new>.sh，直接运行（无需附参数，它会装新版本并记下上一个版本）
 bash myco-install-<new>.sh [profile]
-bash myco-install-0.7.0.sh rollback               # 回滚到上一个版本
-bash myco-install-0.7.0.sh list                   # 列出已装版本（* = 当前活动）
+bash myco-install-0.7.1.sh rollback               # 回滚到上一个版本
+bash myco-install-0.7.1.sh list                   # 列出已装版本（* = 当前活动）
 ```
 - **升级**：拿到新的 `myco-install-<new>.sh` 直接运行（它会装新版本并记下上一个版本）。
 - **自动更新**：`myco upgrade` 查询 GitHub Releases 最新版 → 下载 `myco-install-<version>.sh` → 校验 sha256 → 版本化安装 → 提示重启。`--yes` 跳过确认。默认仓库 `xiaohaoxing/myco-kb`（`MYCO_UPGRADE_REPO` 覆盖）。
@@ -105,18 +105,18 @@ bash myco-install-0.7.0.sh list                   # 列出已装版本（* = 当
 
 ```bash
 # 把依赖切换为 git URL（DSH 识别为「可从 git 更新」的插件）
-bash scripts/install-release.sh git v0.7.0          # 默认 profile ~/.dsh/profiles/web
-# 或指定 profile： bash scripts/install-release.sh git v0.7.0 <profile>
+bash scripts/install-release.sh git v0.7.1          # 默认 profile ~/.dsh/profiles/web
+# 或指定 profile： bash scripts/install-release.sh git v0.7.1 <profile>
 ```
 
 这会把 profile `package.json` 里写成：
 
 ```json
-"@dsh/myco-kb": "github:xiaohaoxing/myco-kb#v0.7.0"
+"@dsh/myco-kb": "github:xiaohaoxing/myco-kb#v0.7.1"
 ```
 
 - **生效**：重启 DeepSeek Harness，DSH 解析 git 依赖并装载插件。
-- **在线更新**：之后仓库打新 tag（如 `v0.7.0`）并发布，**插件管理页会出现「更新」**，点一下即在线更新到新 tag（DSH 自动把依赖 ref 升到新 tag）。
+- **在线更新**：之后仓库打新 tag（如 `v0.7.1`）并发布，**插件管理页会出现「更新」**，点一下即在线更新到新 tag（DSH 自动把依赖 ref 升到新 tag）。
 - **前提**：MyCo-KB 仓库须是标准 DSH bundle（已满足：`cordis.patch.yml` + `dsh.bundle.patch`），发布用 `v*` tag（`build-release.sh` + `gh release create v0.x.0` 已形成此流程）。
 - 手动退回制品/版本化安装：`bash scripts/install-release.sh install dist/dsh-myco-kb-<version>.tgz`。
 
@@ -145,7 +145,7 @@ export PATH="<bin>:$PATH"   # added by install-release.sh
 
 ## 产品化交付须知（版本 / Node / 打包）
 
-- **版本**：npm 包版本**自 `0.5.0` 起与功能里程碑对齐**；**当前 `0.7.0`**（聚合遥测 + 自动更新）。见 [CHANGELOG](/CHANGELOG.md)。
+- **版本**：npm 包版本**自 `0.5.0` 起与功能里程碑对齐**；**当前 `0.7.1`**（聚合遥测 + 自动更新）。见 [CHANGELOG](/CHANGELOG.md)。
 - **Node**：`engines` 已对齐为 `>=23.0.0`（更新流依赖 `node:sqlite`）。
 - **打包**：`build-release.sh`（= `npm run build:release`）做语法检查 → 单测 → 打包 → 校验产物关键文件 → sha256。产物**必须含 `cordis.patch.yml`**（插件 bundle 入口）。
 - **绑定 git 远程**：`myco cloud add` 用系统 git，零依赖；云端库是团队共享知识，**绝不 push 密钥/DSN**。

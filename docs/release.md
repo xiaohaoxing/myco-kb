@@ -18,13 +18,13 @@
 
 ```bash
 cd /path/to/myco-kb
-# 1) 升版本（当前 0.7.0；加特性 → minor，如 0.8.0）
+# 1) 升版本（当前 0.7.1；加特性 → minor，如 0.8.0）
 node -p "require('./package.json').version"      # 看当前
 #    编辑 package.json 的 "version"（或 npm version minor）
-# 2) 更新 CHANGELOG（新增一节 [0.7.0]，标题对齐 package.json）
-# 3) 写 release note 草案 docs/release-notes/0.7.0.md（模板与纪律见 §3）
+# 2) 更新 CHANGELOG（新增一节 [0.7.1]，标题对齐 package.json）
+# 3) 写 release note 草案 docs/release-notes/0.7.1.md（模板与纪律见 §3）
 # 4) 提交 + 推送（含全部代码/文档改动）
-git add -A && git commit -m "release: v0.7.0 — …" && git push -u origin main
+git add -A && git commit -m "release: v0.7.1 — …" && git push -u origin main
 ```
 
 > 版本纪律：`0.5.0` 起 npm 版本与功能里程碑对齐。加特性 → minor；修 bug → patch。
@@ -84,18 +84,18 @@ bash scripts/build-release.sh
 
 ```bash
 GH="$HOME/.local/bin/gh"   # 需已安装并认证（gh auth login）
-"$GH" release create v0.7.0 \
-  --title "MyCo-KB v0.7.0" \
-  --notes-file docs/release-notes/0.7.0.md --target main
+"$GH" release create v0.7.1 \
+  --title "MyCo-KB v0.7.1" \
+  --notes-file docs/release-notes/0.7.1.md --target main
 
-"$GH" release upload v0.7.0 \
-  dist/myco-install-0.7.0.sh \
-  dist/myco-install-0.7.0.sh.sha256 \
-  dist/dsh-myco-kb-0.7.0.tgz \
-  dist/dsh-myco-kb-0.7.0.tgz.sha256
+"$GH" release upload v0.7.1 \
+  dist/myco-install-0.7.1.sh \
+  dist/myco-install-0.7.1.sh.sha256 \
+  dist/dsh-myco-kb-0.7.1.tgz \
+  dist/dsh-myco-kb-0.7.1.tgz.sha256
 ```
 
-> **资产名必须** `myco-install-0.7.0.sh`（不带 `v`）——`myco upgrade` 按此名字找。强烈建议一并上传 `.sha256`（`myco upgrade` 用它校验，防篡改）。
+> **资产名必须** `myco-install-0.7.1.sh`（不带 `v`）——`myco upgrade` 按此名字找。强烈建议一并上传 `.sha256`（`myco upgrade` 用它校验，防篡改）。
 > `myco upgrade` 默认查 `xiaohaoxing/myco-kb` 的 `releases/latest`（`MYCO_UPGRADE_REPO` 可覆盖）。
 
 ---
@@ -105,7 +105,7 @@ GH="$HOME/.local/bin/gh"   # 需已安装并认证（gh auth login）
 ### 路径 A：自包含安装器 / `myco upgrade`
 ```bash
 # 用户机器
-bash myco-install-0.7.0.sh          # 版本化安装（保留旧版本可回滚）
+bash myco-install-0.7.1.sh          # 版本化安装（保留旧版本可回滚）
 myco upgrade                        # 或自动更新（下载+sha256 校验+安装）；--yes 跳过确认
 # 重启 DeepSeek Harness 后生效（服务端代码启动时加载；控制台刷新见新 UI）
 ```
@@ -113,7 +113,7 @@ myco upgrade                        # 或自动更新（下载+sha256 校验+安
 ### 路径 B：DSH 插件管理在线更新（git 依赖）
 ```bash
 # 一次性把插件切为 git 依赖
-bash scripts/install-release.sh git v0.7.0
+bash scripts/install-release.sh git v0.7.1
 # 重启 DSH → DSH 识别为「可从 git 更新」插件
 ```
 - 之后打新 tag + 发布，**DSH 插件管理页出现「更新」按钮** → 点一下即在线更新。
@@ -124,7 +124,7 @@ bash scripts/install-release.sh git v0.7.0
 ## 6. 回滚
 
 ```bash
-bash myco-install-0.7.0.sh rollback        # 或 install-release.sh rollback
+bash myco-install-0.7.1.sh rollback        # 或 install-release.sh rollback
 # 采用版本化安装：旧版本保留在 .myco-kb-versions/<ver>/，升级前备份 profile/package.json
 ```
 
@@ -135,9 +135,9 @@ bash myco-install-0.7.0.sh rollback        # 或 install-release.sh rollback
 - [ ] `package.json` version + `CHANGELOG` 一致（`v*` tag = 版本）
 - [ ] `docs/release-notes/<v>.md` 已按 §3 规范编写并与 CHANGELOG 一致
 - [ ] `bash scripts/build-release.sh` 通过（含全量测试 + 产物校验）
-- [ ] GitHub Release `v0.7.0` 创建（`--notes-file` 引用 release note），资产 `myco-install-0.7.0.sh`(+`.sha256`) + `.tgz`(+`.sha256`) 已上传
+- [ ] GitHub Release `v0.7.1` 创建（`--notes-file` 引用 release note），资产 `myco-install-0.7.1.sh`(+`.sha256`) + `.tgz`(+`.sha256`) 已上传
 - [ ] `myco install --version` / `myco upgrade` 能识别最新版（可先 `myco upgrade` 测）
-- [ ] （路径 B）`scripts/install-release.sh git v0.7.0` 已切换，DSH 插件管理可更新
+- [ ] （路径 B）`scripts/install-release.sh git v0.7.1` 已切换，DSH 插件管理可更新
 - [ ] 发布后：重启 DSH 在插件管理页确认新版本，控制台显示正常
 
 ---

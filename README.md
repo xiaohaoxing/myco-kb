@@ -104,15 +104,15 @@ npm run build    # 静态产物 .vitepress/dist/，可部署到任意静态托�
 
 > 面向企业交付项目知识/文档/经验沉淀底座的手册见 [企业交付 Cookbook](/docs/enterprise-delivery-cookbook.md)。
 
-- **版本**：npm 包版本**自 `0.5.0` 起与功能里程碑对齐**；**当前 `0.7.0`**（v0.4 按任务动态装配 + 聚合遥测 + 自动更新，0.6.0 基线）。变更见 [CHANGELOG](/CHANGELOG.md)。
+- **版本**：npm 包版本**自 `0.5.0` 起与功能里程碑对齐**；**当前 `0.7.1`**（v0.4 按任务动态装配 + 聚合遥测 + 自动更新，0.6.0 基线）。变更见 [CHANGELOG](/CHANGELOG.md)。
 - **Node 前提**：更新流用到 `node:sqlite`（`DatabaseSync`），需要 **Node ≥ 23，推荐 24**（`package.json` `engines` 已对齐；Node 18/20 会在更新流路径崩溃）。基础 CLI 命令在更新流之外可在更低版本工作，但完整功能需上述版本。
 - **发布构建**：`npm run build:release`（= `bash scripts/build-release.sh`）——语法检查 → 单元测试 → 打包 → 校验产物关键文件 → sha256，产物 `dist/dsh-myco-kb-<version>.tgz`。
 - **发布方式（Release Runbook）**：完整发版/分发/更新流程（升版本 → 构建 → GitHub Release + 上传资产 → `myco upgrade` / DSH 插件管理在线更新 → 回滚）见 [docs/release.md](/docs/release.md)。
 - **自包含安装器**：`build-release.sh` 额外产出 `dist/myco-install-<version>.sh`（**一个文件**内含安装器 + 制品 base64）。新设备只需拷这一个文件即可**安装 / 升级 / 回滚 / 查看**：
   ```bash
-  bash myco-install-0.7.0.sh [profile]            # 安装（默认 profile ~/.dsh/profiles/web）
-  bash myco-install-0.7.0.sh rollback [profile]   # 回滚
-  bash myco-install-0.7.0.sh list [profile]       # 查看已装版本
+  bash myco-install-0.7.1.sh [profile]            # 安装（默认 profile ~/.dsh/profiles/web）
+  bash myco-install-0.7.1.sh rollback [profile]   # 回滚
+  bash myco-install-0.7.1.sh list [profile]       # 查看已装版本
   ```
   它：① 解出制品 tarball ② 执行 `install-release.sh install` ③ 生成可直接用的 `myco` 命令。
 - **制品安装/升级/回滚**：`bash scripts/install-release.sh install dist/dsh-myco-kb-<version>.tgz [profile]`（替代开发用符号链接 `install-profile.sh`）；支持 `rollback` / `list`。默认 profile `~/.dsh/profiles/web`。

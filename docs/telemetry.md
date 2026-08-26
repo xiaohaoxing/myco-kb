@@ -18,7 +18,7 @@ MyCo-KB 通过 **daemon 定时**上报**严格匿名的聚合统计**，用于�
   "schema": 1,
   "product": "myco-kb",
   "instanceId": "<随机 UUID>",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "platform": "darwin",        // process.platform
   "arch": "arm64",             // process.arch
   "nodeVersion": "24.18.1",
@@ -83,7 +83,7 @@ myco telemetry set https://us.i.posthog.com/i/v0/e/   # 或 EU: https://eu.i.pos
   "event": "myco_kb_heartbeat",
   "distinct_id": "<随机 UUID>",
   "timestamp": "<ISO>",
-  "properties": { "version": "0.7.0", "platform": "darwin", "counts_packages": 3, "...": "..." }
+  "properties": { "version": "0.7.1", "platform": "darwin", "counts_packages": 3, "...": "..." }
 }
 ```
 

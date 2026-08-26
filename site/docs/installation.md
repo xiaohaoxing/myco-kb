@@ -21,7 +21,7 @@ bash scripts/build-release.sh        # → dist/myco-install-<version>.sh + dist
 
 ```bash
 node -v                             # 确认 ≥ 23（安装器也会再校验）
-bash myco-install-0.7.0.sh [profile] # 默认 profile ~/.dsh/profiles/web
+bash myco-install-0.7.1.sh [profile] # 默认 profile ~/.dsh/profiles/web
 ```
 
 它自动完成：解出制品 → `install-release.sh install`（版本化安装 + 依赖声明 + bundle 条目）→ 生成可直接用的 `myco` 命令。
@@ -41,9 +41,9 @@ myco status && myco index
 自包含安装器就是完整工具（不依赖其它脚本）：
 
 ```bash
-bash myco-install-0.7.0.sh [profile]            # 安装
-bash myco-install-0.7.0.sh rollback [profile]   # 回滚到上一个版本
-bash myco-install-0.7.0.sh list [profile]       # 列出已装版本（* = 当前活动）
+bash myco-install-0.7.1.sh [profile]            # 安装
+bash myco-install-0.7.1.sh rollback [profile]   # 回滚到上一个版本
+bash myco-install-0.7.1.sh list [profile]       # 列出已装版本（* = 当前活动）
 ```
 
 - **升级**：拿到新的 `myco-install-<new>.sh` 直接运行即可（装新版本并记下上一个版本）。
@@ -54,7 +54,7 @@ bash myco-install-0.7.0.sh list [profile]       # 列出已装版本（* = 当�
 
 安装器生成 `~/.local/bin/myco` 启动器（用解析到的 node 指向当前 profile 的插件 CLI）。若该目录不在 PATH，默认把**带标记的 `export PATH` 块**写入 shell rc（优先 `~/.zshrc`）——幂等、可逆；新 shell 或 `source` 后生效。
 
-- 不改 shell rc：`MYCO_NO_PATH=1 bash myco-install-0.7.0.sh`
+- 不改 shell rc：`MYCO_NO_PATH=1 bash myco-install-0.7.1.sh`
 - 自定义目录：`MYCO_BIN_DIR=<dir>`
 
 ## （可选）接团队共享云端包
