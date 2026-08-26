@@ -109,6 +109,7 @@ npm run build    # 静态产物 .vitepress/dist/，可部署到任意静态托�
 - **版本**：npm 包版本**自 `0.5.0` 起与功能里程碑对齐**；**当前 `0.6.0`**（聚合遥测 + 自动更新）。变更见 [CHANGELOG](/CHANGELOG.md)。
 - **Node 前提**：更新流用到 `node:sqlite`（`DatabaseSync`），需要 **Node ≥ 23，推荐 24**（`package.json` `engines` 已对齐；Node 18/20 会在更新流路径崩溃）。基础 CLI 命令在更新流之外可在更低版本工作，但完整功能需上述版本。
 - **发布构建**：`npm run build:release`（= `bash scripts/build-release.sh`）——语法检查 → 单元测试 → 打包 → 校验产物关键文件 → sha256，产物 `dist/dsh-myco-kb-<version>.tgz`。
+- **发布方式（Release Runbook）**：完整发版/分发/更新流程（升版本 → 构建 → GitHub Release + 上传资产 → `myco upgrade` / DSH 插件管理在线更新 → 回滚）见 [docs/release.md](/docs/release.md)。
 - **自包含安装器**：`build-release.sh` 额外产出 `dist/myco-install-<version>.sh`（**一个文件**内含安装器 + 制品 base64）。新设备只需拷这一个文件即可**安装 / 升级 / 回滚 / 查看**：
   ```bash
   bash myco-install-0.6.0.sh [profile]            # 安装（默认 profile ~/.dsh/profiles/web）
