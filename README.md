@@ -1,6 +1,6 @@
 # MyCo-KB
 
-真菌之库 · 我的公司 —— 知识库管理系统（DeepSeek Harness 插件形态）
+真菌之库 · 知识库管理系统（DeepSeek Harness 插件形态）
 
 > 权威设计文档：Obsidian 知识库 `项目/MyCo-KB/MyCo-KB 架构设计.md`（本仓库 `docs/architecture.md` 为工程视图）
 
@@ -79,21 +79,15 @@ npm run test:host # 宿主平面验证（真实 Cordis：服务/工具/daemon/re
 `test:host` 必须用独立进程跑（`node scripts/host-check.mjs`），**不能用 `node --test`**：
 Cordis 纤维在 node:test 的 async context 下不会 apply（已实测确认的环境不兼容）。
 
-### 安装进 Harness（静默常驻）—— 已执行（2026-08-19）
+### 安装进 Harness（开发态）
 
-> 这是**开发者本机的开发安装说明**（符号链接到源码仓库）。**给新设备请走产品化安装**，见[安装指导](/docs/installation)。
+> 这是**开发者本机的开发安装说明**（符号链接到源码仓库）。**给新设备/正式环境请走产品化安装**，见[安装指导](/docs/installation)。
 
 ```bash
 scripts/install-profile.sh   # 符号链接进 ~/.dsh/profiles/web + 声明依赖（幂等）
 ```
 
-已完成的三步（备份在 `~/.dsh/profiles/web/*.bak-20260819-*`）：
-1. `install-profile.sh`：`node_modules/@dsh/myco-kb` → 本仓库符号链接 + package.json 声明依赖
-2. `myco mount` 两个试点知识包（超合体数据工厂 + MyCo-KB）写入 `~/.myco/config.json`（插件启动自动读取）
-3. `cordis.patch.yml` 追加 insert 补丁启用 `@dsh/myco-kb`（config: maintenanceIntervalHours 6）
-
-**重启 Harness 后生效**：插件管理页 Plugins 设置区出现 MyCo-KB 控制台 tab；
-daemon 静默监听两个知识包，变更自动增量索引。
+> 说明：`install-profile.sh` 作为开发者本机的符号链接安装用，会覆盖正式制品（`scripts/install-release.sh install <tgz>` 安装的版本化布局）。开发结束后请用正式安装替换回制品。重启 Harness 后生效。
 
 ## 官方网站
 

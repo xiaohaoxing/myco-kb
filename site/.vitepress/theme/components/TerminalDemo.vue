@@ -16,8 +16,8 @@ $ myco index
 <span class="c"># 检索：agent 工具与 CLI 同源</span>
 $ myco find 架构
 <span class="b">12</span>  myco-kb/MyCo-KB 架构设计.md
-<span class="b"> 4</span>  超合体数据工厂/api-gateway/当前架构与对接现状.md
-<span class="b"> 3</span>  超合体数据工厂/data-factory/当前架构与对接现状.md
+<span class="b"> 4</span>  company-kb/api-gateway/当前架构与对接现状.md
+<span class="b"> 3</span>  company-kb/data-factory/当前架构与对接现状.md
 
 <span class="c"># 生命周期候选扫描（仅报告，淘汰默认归档不删除）</span>
 $ myco sweep

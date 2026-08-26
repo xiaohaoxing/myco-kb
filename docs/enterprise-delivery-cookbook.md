@@ -28,7 +28,7 @@
 ```
 产物：@dsh/myco-kb（npm 包，版本 0.1.0）+ myco CLI + 3 个 agent 技能 + VitePress 官网
 形态：Cordis 插件（宿主平面运行）+ 独立 CLI（零依赖）
-运行时已挂载 3 个知识包：repo:超合体数据工厂 / repo:MyCo-KB / cloud:chaoheti-kb
+运行时已挂载 3 个知识包：repo:company-kb / repo:MyCo-KB / cloud:company-kb
 当前索引：40 文档 / 19 tags / 索引新鲜
 ```
 

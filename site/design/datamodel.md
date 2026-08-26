@@ -33,7 +33,7 @@ id / name / scope / version / state / dependencies / whenToUse
 tag 命中 ×3 + 文件名 ×2 + 全文 ×1
 ```
 
-- 全库命名空间 tag（如 `chaoheti`）为停用词，不参与匹配；
+- 全库命名空间 tag（如 `acme`）为停用词，不参与匹配；
 - 结果带 `isEvidence` 标记，供按可信度取舍；
 - 返回 top 20。
 

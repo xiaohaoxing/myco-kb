@@ -5,11 +5,11 @@
 
 ## 一、准备云端仓库（GitLab / GitHub 二选一）
 
-### GitLab（内网，推荐——与 chaoheti 共用）
+### GitLab（内网，推荐——与团队共享库共用）
 
-1. 在 GitLab（`100.71.123.6:8929`）新建空白项目，如 `shared-kb`（不带 README，稍后本地 push）
+1. 在 GitLab（`gitlab.example.com:8929`）新建空白项目，如 `shared-kb`（不带 README，稍后本地 push）
 2. 确认本机 SSH key 已加入 GitLab（`~/.ssh/id_ed25519.pub` → GitLab 设置 → SSH Keys）
-3. 仓库 URL 用 SSH 形式：`git@100.71.123.6:2424/<group>/shared-kb.git`（SSH 端口 2424）
+3. 仓库 URL 用 SSH 形式：`git@gitlab.example.com:2424/<group>/shared-kb.git`（SSH 端口 2424）
 
 ### GitHub（公网）
 
@@ -23,7 +23,7 @@
 
 ```bash
 # 1. 注册云端根（clone 到 ~/.myco/cloud/shared-kb）
-myco cloud add shared git@100.71.123.6:2424/<group>/shared-kb.git
+myco cloud add shared git@gitlab.example.com:2424/<group>/shared-kb.git
 
 # 2. 挂载 + 首次同步（clone 到本地）
 myco mount cloud:shared
@@ -60,14 +60,12 @@ daemon 形态（装进 Harness 后）：定时维护周期内自动执行 `syncA
   → 控制台「传播队列」+ 飞书通知
 ```
 
-## 五、repo → cloud 依赖（真实案例，2026-08-21）
-
-超合体数据工厂 KB 声明依赖云端包，配额口径权威收敛到云端契约：
+## 五、repo → cloud 依赖（示例）——本机 repo 包声明依赖云端包，配额口径权威收敛到云端契约：
 
 ```yaml
-# 超合体数据工厂/kb.yaml
+# company-kb/kb.yaml
 scope: repo
-dependencies: [chaoheti-kb]
+dependencies: [company-kb-cloud]
 ```
 
 ```markdown
@@ -76,7 +74,7 @@ dependencies: [chaoheti-kb]
 ```
 
 实测：云端契约 `shared-quota-rule` v1→v2 → `myco cloud sync` → 事件 #27 [major] →
-传播（跨包引用）超合体数据工厂/数据指标口径.md + 依赖传播（dependencies 声明）超合体数据工厂
+传播（跨包引用）company-kb/数据指标口径.md + 依赖传播（dependencies 声明）company-kb
 → stale 自动标记 + webhook 通知 → 控制台确认。
 
 ## 六、冲突与回滚
