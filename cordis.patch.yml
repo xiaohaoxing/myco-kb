@@ -9,6 +9,13 @@
         # 定时维护间隔（小时）：索引重建 → 生命周期扫描 → 云端 git 同步
         maintenanceIntervalHours: 6
 
+        # v0.4 按任务动态装配（agent 作用域，opt-in；取消注释并设 auto:true 生效）
+        # auto: 订阅 agent/created 后，在 agent 作用域内用「最近一次装配」注入 scoped 检索工具。
+        # 注意：agent 创建时目标往往未就绪，故此处复用最近一次 myco assemble 的 lockfile；
+        # 真正「agent start 读目标自动装配」需真实 agent 循环核验（见 docs/v0.4-dynamic-assembly.md §7）。
+        # assemble:
+        #   auto: true
+
         # 聚合遥测（opt-in）：用户勾选「统计共享」才上报，仅匿名聚合统计。
         # provider=posthog：按 PostHog 单事件格式 POST {api_key,event,distinct_id,properties,timestamp}。
         # url = PostHog 云端摄入端点（US=us.i.posthog.com，EU=eu.i.posthog.com，自建按你的域名）+ /i/v0/e/。

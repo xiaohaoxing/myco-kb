@@ -38,3 +38,21 @@ myco status     # 输出中显示「激活 profile」
 ```
 
 控制台「组合配置」区可查看与切换。
+
+## 按任务动态装配（v0.4）
+
+静态 profile 是「人声明的装配规则」，而**按任务动态装配**（`myco assemble`）是「根据当前任务目标自动挑出刚好够用的知识包子集 + 工具掩码」：
+
+```bash
+myco assemble "配置 API 网关生产步骤"   # 匹配 profile + 知识包子集 + 工具掩码
+myco assemble-status                    # 查看最近一次装配（lockfile，可复现）
+```
+
+装配分两层：
+
+1. **profile 精确匹配**：任务者的用户 / 环境 / 目标与各 profile 的 `match.{用户,环境,目标}` 逐维命中，命中即锁定该 profile 的 include/exclude。
+2. **知识包子集软匹配**：在 profile 包内再按 `whenToUse` 语义 ×5 > tag ×3 > 文件名 ×2 > 全文 ×1 打分排序，取「刚好够用」的子集；命中为空时回退默认（全量包不裁剪）。
+
+装配结果含 `toolMask`（保留检索/装配基础工具、列出被裁包）与可复现 `lockfile`（写入 `data/assemble.lock.json`）。控制台「按任务动态装配」区可视化展示。
+
+> 边界：装配只影响 agent「看到哪些」，不是权限边界；它不改变「文件是唯一事实源」的底层约定。

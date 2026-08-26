@@ -65,9 +65,9 @@ async function verifyHostPlane() {
   const names = remoteMethods(myco).map((m) => m.method).sort()
   assert.deepEqual(names, ['cloudAdd', 'cloudList', 'cloudRemove', 'cloudStatus', 'cloudSync', 'find', 'index', 'mounts', 'profiles', 'status', 'sweep', 'useProfile'])
 
-  // agent 工具注册 4 个
-  assert.equal(registeredTools.length, 4)
-  assert.deepEqual(registeredTools.map((t) => t.name).sort(), ['myco_find', 'myco_index', 'myco_status', 'myco_sweep'])
+  // agent 工具注册 5 个（v0.4 新增 myco_assemble）
+  assert.equal(registeredTools.length, 5)
+  assert.deepEqual(registeredTools.map((t) => t.name).sort(), ['myco_assemble', 'myco_find', 'myco_index', 'myco_status', 'myco_sweep'])
 
   // 控制台 JSON API 路由已注册（/myco/api，client fetch 通道）
   assert.ok(webServerRoutes.some((r) => r.kind === 'prefix' && r.path === '/myco/api'), '应注册 /myco/api 路由')
@@ -109,6 +109,17 @@ async function verifyHostPlane() {
   const cts = await call('/myco/api/contracts')
   assert.equal(cts.status, 200)
   assert.ok(Array.isArray(cts.payload))
+
+  // --- v0.4 按任务动态装配：HTTP 数据通道 ---
+  const asmb = await call('/myco/api/assemble?goal=' + encodeURIComponent('部署'))
+  assert.equal(asmb.status, 200)
+  assert.ok(asmb.payload.packages.length >= 1, '装配应命中知识包子集')
+  assert.ok(Array.isArray(asmb.payload.documents))
+  assert.ok(asmb.payload.toolMask.keep.includes('myco_find'))
+  const asmbLast = await call('/myco/api/assemble/last')
+  assert.equal(asmbLast.status, 200)
+  assert.equal(asmbLast.payload.mode, asmb.payload.mode)
+
   const wh = await call('/myco/api/webhook')
   assert.equal(wh.status, 200)
   assert.ok('enabled' in wh.payload)
@@ -167,7 +178,7 @@ async function verifyHostPlane() {
   if (typeof pluginFiber?.dispose === 'function') await pluginFiber.dispose()
   app.fiber.dispose?.()
 
-  console.log('✅ 宿主平面验证通过：ctx.myco / 12 Remote 方法 / 4 工具 / daemon / 检索 / 挂载 / cloud / myco API 路由')
+  console.log('✅ 宿主平面验证通过：ctx.myco / 12 Remote 方法 / 5 工具 / daemon / 检索 / 挂载 / cloud / myco API 路由 / assemble')
 }
 
 verifyHostPlane().then(

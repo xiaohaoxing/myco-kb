@@ -49,6 +49,8 @@ function usage() {
   myco find <关键词...>      检索（tag×3 / 文件名×2 / 全文×1）
   myco profile list         列出组合配置
   myco profile use <name>   激活组合配置
+  myco assemble <目标>      按任务动态装配知识包子集 + 工具掩码（写 assemble.lock.json）
+  myco assemble-status      查看最近一次装配的 lockfile（可复现）
   myco sweep                生命周期候选扫描（仅报告）
   myco cloud add <n> <url>  注册云端知识根（git 仓库；默认不自动同步，--sync 订阅）
   myco cloud sync on <n>    订阅云端包（进自动同步名单，opt-in）
@@ -165,6 +167,35 @@ async function main() {
         return
       }
       throw new Error(`未知子命令: ${sub}`)
+    }
+    case 'assemble': {
+      if (args.length === 0) throw new Error('用法: myco assemble <目标>')
+      const r = myco.assemble(args.join(' '))
+      const mode = r.mode === 'fallback-default' ? '回退默认（全量包）' : (r.mode === 'profile+soft' ? 'profile+软匹配' : '软匹配')
+      console.log(`装配模式: ${mode}  profile: ${r.profile?.name ?? '（默认）'}  工具掩码: ${r.toolMask.note}`)
+      if (r.packages.length === 0) { console.log('（无知识包子集）'); return }
+      console.log('命中知识包:')
+      for (const p of r.packages) {
+        const score = Number.isFinite(p.score) ? `score ${p.score}` : '（回退，无打分）'
+        console.log(`  ${score.padEnd(18)} ${p.id}  [${p.scope}] v${p.version} — ${p.whenToUse ? p.whenToUse.slice(0, 60) : p.name}`)
+        if (Number.isFinite(p.score)) console.log(`      ${p.reason}`)
+      }
+      const rec = r.documents.filter((d) => d.score > 0)
+      if (rec.length > 0) {
+        console.log('推荐文档:')
+        for (const d of rec.slice(0, 10)) console.log(`  ${d.score}  ${d.packageId}/${d.rel}${d.isEvidence ? '  [证据]' : ''}`)
+      }
+      console.log(`lockfile: ${join(dataDir, 'assemble.lock.json')}`)
+      return
+    }
+    case 'assemble-status': {
+      const last = myco.lastAssemble()
+      if (!last) { console.log('尚未装配过。先运行 `myco assemble <目标>`'); return }
+      console.log(`最近装配: ${last.generatedAt}  goal: ${last.goal}`)
+      console.log(`mode: ${last.mode}  profile: ${last.profile ?? '（默认）'}  包: ${last.packages.length}`)
+      for (const p of last.packages) console.log(`  ${p.id}  ${p.score ?? ''}`)
+      console.log(`工具掩码 keep: ${last.toolMask?.keep?.join(', ') ?? ''}`)
+      return
     }
     case 'sweep': {
       const r = myco.sweep()

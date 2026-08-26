@@ -40,9 +40,9 @@
 | v0.2 | 插件化（Cordis）+ 控制台 tab（远程服务 12 方法）+ 宿主平面 daemon（watcher + 定时维护） | ✅ |
 | v0.3 | 云端 git 同步（clone/pull/commit/push，冲突报告不丢本地改动；同步后自动变更检测；opt-in 订阅） | ✅ |
 | v0.5 | 知识更新流：契约解析 / 变更检测 / 影响分析 / stale 队列 / 控制台染色/传播视图 / webhook 通知 / subagent 起草调度 | ✅ |
-| v0.4 | **按任务动态装配** profile 与工具面 | ⏳ **未做**（目前 NEXT） |
+| v0.4 | **按任务动态装配** profile 与工具面：数据面 `myco assemble` + lockfile + 工具面 `myco_assemble` + 控制台装配视图 | ✅（agent 作用域 restrict/register 待实机核验） |
 
-> ⚠️ **版本**：自 `0.5.0` 起 npm 包版本与功能里程碑**对齐**；**当前 `0.6.0`**（聚合遥测 + 自动更新）。旧版曾长期停在 `0.1.0` 而功能里程碑编号为 v0.2/v0.3/v0.5。见 [CHANGELOG](/CHANGELOG.md)。
+> ⚠️ **版本**：自 `0.5.0` 起 npm 包版本与功能里程碑**对齐**；**当前 `0.7.0`**（聚合遥测 + 自动更新）。旧版曾长期停在 `0.1.0` 而功能里程碑编号为 v0.2/v0.3/v0.5。见 [CHANGELOG](/CHANGELOG.md)。
 
 ### 1.2 已实测的边界（务必写进交付说明）
 
@@ -146,7 +146,7 @@ whenToUse: 什么时候该用这个包（给 agent 的择包说明）
 
 | # | 改造项 | 状态 | 已落地 / 待做 |
 | --- | --- | --- | --- |
-| 1 | **发布定义** | ✅ |  版本对齐 **0.5.0 = 功能里程碑 v0.5**；当前 **0.6.0**（聚合遥测+自动更新）；`CHANGELOG.md`；按 semver 标 breaking/new/fix |
+| 1 | **发布定义** | ✅ |  版本对齐 **0.5.0 = 功能里程碑 v0.5**；当前 **0.7.0**（聚合遥测+自动更新）；`CHANGELOG.md`；按 semver 标 breaking/new/fix |
 | 2 | **真实制品** | ✅ | `npm/pnpm pack` 产物已含 `lib/ bin/ skills/ cordis.patch.yml README.md`；`build-release.sh` 打包并校验 |
 | 3 | **安装方式** | ✅ | `scripts/install-release.sh install <tarball> [profile]`：解包到版本目录 + 声明依赖 + 追加 `dsh.profile.bundles` + 重启指引（替代开发符号链接） |
 | 4 | **升级/回滚** | ✅ | `install-release.sh install` 升级；`rollback` 回滚；`list` 查看版本（版本化安装 + package.json 备份） |
@@ -177,9 +177,9 @@ git@<gitlab-host>:<group>/team-shared-kb.git   # SSH 形式；URL 不内嵌 toke
 # 1. 校验 Node（安装器会再次检查，需 ≥23，推荐 24）
 node -v
 # 2a. 首选：一个文件自包含安装（内含安装器 + 制品，拷这一个文件即可）
-bash myco-install-0.6.0.sh [profile]
+bash myco-install-0.7.0.sh [profile]
 # 2b. 或：制品 + 安装脚本
-bash scripts/install-release.sh install dist/dsh-myco-kb-0.6.0.tgz
+bash scripts/install-release.sh install dist/dsh-myco-kb-0.7.0.tgz
 #   升级：install <新制品.tgz>；回滚：install-release.sh rollback；查看：install-release.sh list
 #   说明：安装器会自动生成可直接用的 myco 命令（~/.local/bin/myco），并默认写入带标记的 shell rc PATH。
 #         不想改 shell rc：MYCO_NO_PATH=1 bash ... （仅生成启动器并打印提示）；可用 MYCO_BIN_DIR 自定义 bin 目录。
@@ -275,7 +275,7 @@ myco daemon                       # 前台跑守护（排障）
 | 3 | **无 RBAC / SSO / 审计** | 权限、合规需靠 git 托管 | 用 GitLab 权限矩阵；审计靠 git 历史 + 事件日志 |
 | 4 | **Node 版本前提**：`node:sqlite` 需 Node ≥ 23 | Node 18/20 机器装完整功能会崩 | **已修正**：`engines >=23.0.0` + 安装器 `install-release.sh` 启动版本检查（§5 第 5 项）；企业机器仍需满足 |
 | 5 | **每机器一个 daemon，无中央服务器** | 写入排他靠 git first-wins；并发写冲突需人工 | 单写者实践（PM 收口发布）；冲突报告不丢本地改动 |
-| 6 | **npm 版本与里程碑不同步** | 无 semver 变更叙事 | **已对齐 0.5.0 = v0.5**；当前 **0.6.0** + `CHANGELOG.md`（§5 第 1 项） |
+| 6 | **npm 版本与里程碑不同步** | 无 semver 变更叙事 | **已对齐 0.5.0 = v0.5**；当前 **0.7.0** + `CHANGELOG.md`（§5 第 1 项） |
 | 7 | **安装是符号链接，非真实制品** | 无法分发/升级/回滚 | **已改制品安装**：`install-release.sh install/rollback/list`；**自带 `dist/myco-install-<v>.sh` 自包含一个文件安装**，且自动生成可直接用的 `myco` 命令（§5 第 2/3/4 项；自包含安装器见 §6.2） |
 | 8 | **peerDependencies 锁 rc 版本** | 需匹配的 DSH 版本 | ⏳ 建立 DSH 版本支持矩阵（§5 第 6 项） |
 | 9 | **无 CI/CD 发布流水线** | 交付一致性低 | ⏳ `build-release.sh` 本地校验已完备；发布流水线与官网部署未接线（§5 第 8 项） |
@@ -291,9 +291,9 @@ myco daemon                       # 前台跑守护（排障）
 | **P0 试点**（1 个团队 / 1 个项目） | 跑通并证明价值 | 产品化改造（§5 关键项）→ 建 1 个 repo 包 + 1 个云端共享包 → 2 台机器同步 + 影响分析 | `cloud sync` 跨机传播实测通过；PM 认可影响分析价值 |
 | **P1 扩展**（若干项目团队） | 推广知识治理 | 定结构规范、契约命名约定、评审节奏；每 team 一名知识所有者 | 周度 stale/事件有节奏；webhook 通知上轨道 |
 | **P2 治理**（企业级） | 沉淀为资产 | 生命周期治理、归档节奏、组合 profile 按角色装配、官网文档引流 | `myco sweep` 候选处理闭环；知识沉淀可追溯 |
-| **P3 可选**（动态装配 / 多用户协作） | 能力跃迁 | v0.4 动态装配、更新流深化、更高权限模型 | 任务级「刚好够用」知识装配 |
+| **P3 可选**（动态装配 / 多用户协作） | 能力跃迁 | v0.4 动态装配（已落地，agent 作用域屏蔽待实机核验）、更新流深化、更高权限模型 | 任务级「刚好够用」知识装配 |
 
-> v0.4（按任务动态装配）是当前 roadmap 的唯一 NEXT，交付早期可先不做，作为 P3 选项。
+> v0.4（按任务动态装配）已实现（数据面 + 工具面 + 控制台视图），企业交付早期仍可先不做，作为 P3 选项——需要时开箱即用。
 
 ---
 

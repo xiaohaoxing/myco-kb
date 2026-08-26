@@ -24,6 +24,8 @@ myco status                        # 维护状态
 myco find 部署                      # 检索（tag×3 / 文件名×2 / 全文×1）
 myco sweep                         # 生命周期候选扫描（仅报告）
 myco profile list                  # 组合配置
+myco assemble <目标>               # 按任务动态装配（知识包子集 + 工具掩码）
+myco assemble-status               # 查看最近一次装配的 lockfile
 myco cloud add <name> <url>        # 注册云端知识根（git 仓库）
 myco cloud sync [name]             # 同步云端包（clone/pull/push）
 ```
@@ -50,6 +52,8 @@ lib/
     sweeper.js      生命周期候选扫描
     status.js       状态快照
     profile.js      组合配置
+    assemble.js     v0.4 按任务动态装配（匹配引擎 + 装配 + 工具掩码 + lockfile）
+    taskctx.js      v0.4 任务上下文归一化（目标/用户/环境 + 分词）
 bin/myco.js       CLI
 skills/           myco-search / myco-maintain / myco-lifecycle
 scripts/
@@ -106,15 +110,15 @@ npm run build    # 静态产物 .vitepress/dist/，可部署到任意静态托�
 
 > 面向企业交付项目知识/文档/经验沉淀底座的手册见 [企业交付 Cookbook](/docs/enterprise-delivery-cookbook.md)。
 
-- **版本**：npm 包版本**自 `0.5.0` 起与功能里程碑对齐**；**当前 `0.6.0`**（聚合遥测 + 自动更新）。变更见 [CHANGELOG](/CHANGELOG.md)。
+- **版本**：npm 包版本**自 `0.5.0` 起与功能里程碑对齐**；**当前 `0.7.0`**（v0.4 按任务动态装配 + 聚合遥测 + 自动更新，0.6.0 基线）。变更见 [CHANGELOG](/CHANGELOG.md)。
 - **Node 前提**：更新流用到 `node:sqlite`（`DatabaseSync`），需要 **Node ≥ 23，推荐 24**（`package.json` `engines` 已对齐；Node 18/20 会在更新流路径崩溃）。基础 CLI 命令在更新流之外可在更低版本工作，但完整功能需上述版本。
 - **发布构建**：`npm run build:release`（= `bash scripts/build-release.sh`）——语法检查 → 单元测试 → 打包 → 校验产物关键文件 → sha256，产物 `dist/dsh-myco-kb-<version>.tgz`。
 - **发布方式（Release Runbook）**：完整发版/分发/更新流程（升版本 → 构建 → GitHub Release + 上传资产 → `myco upgrade` / DSH 插件管理在线更新 → 回滚）见 [docs/release.md](/docs/release.md)。
 - **自包含安装器**：`build-release.sh` 额外产出 `dist/myco-install-<version>.sh`（**一个文件**内含安装器 + 制品 base64）。新设备只需拷这一个文件即可**安装 / 升级 / 回滚 / 查看**：
   ```bash
-  bash myco-install-0.6.0.sh [profile]            # 安装（默认 profile ~/.dsh/profiles/web）
-  bash myco-install-0.6.0.sh rollback [profile]   # 回滚
-  bash myco-install-0.6.0.sh list [profile]       # 查看已装版本
+  bash myco-install-0.7.0.sh [profile]            # 安装（默认 profile ~/.dsh/profiles/web）
+  bash myco-install-0.7.0.sh rollback [profile]   # 回滚
+  bash myco-install-0.7.0.sh list [profile]       # 查看已装版本
   ```
   它：① 解出制品 tarball ② 执行 `install-release.sh install` ③ 生成可直接用的 `myco` 命令。
 - **制品安装/升级/回滚**：`bash scripts/install-release.sh install dist/dsh-myco-kb-<version>.tgz [profile]`（替代开发用符号链接 `install-profile.sh`）；支持 `rollback` / `list`。默认 profile `~/.dsh/profiles/web`。
@@ -129,4 +133,4 @@ npm run build    # 静态产物 .vitepress/dist/，可部署到任意静态托�
   宿主平面维护用 Cordis 插件自身 `setInterval` + 文件 watcher（已实现）。
 - 控制台挂在插件管理页 `settings.plugins.tab` slot（与 plugin-inventory 同槽）。
 
-进度：v0.1 CLI ✅；v0.2 控制台 tab + 远程服务 + daemon 宿主化 ✅；**v0.3 云端 git 同步 ✅**（clone/pull/push/冲突报告，全流程实测）；v0.4 动态装配（规划中）；v0.5 知识更新流 ✅；**产品化交付（0.6.0）：发布/安装/回滚/自动更新 + 企业 Cookbook ✅**。
+进度：v0.1 CLI ✅；v0.2 控制台 tab + 远程服务 + daemon 宿主化 ✅；**v0.3 云端 git 同步 ✅**（clone/pull/push/冲突报告，全流程实测）；**v0.4 动态装配 ✅**（数据面 `myco assemble <goal>` + 工具面 `myco_assemble` + 控制台视图，agent 作用域 restrict/register 为运行时核验点）；v0.5 知识更新流 ✅；**产品化交付（0.6.0）：发布/安装/回滚/自动更新 + 企业 Cookbook ✅**。

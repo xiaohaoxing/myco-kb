@@ -4,6 +4,26 @@ MyCo-KB 的版本遵循语义化版本（semver）。本文记录每个 npm 发�
 
 > **版本与里程碑的对应**：项目内的 v0.x 功能里程碑（roadmap）与 npm 包版本（semver）历史上不同步——功能里程碑在 `0.1.0` 下持续累积交付。**自 `0.5.0` 起对齐**：npm 包版本 = 该发布所包含的最终功能里程碑。首个产品化交付版本即把包含到 v0.5 的全部功能，统一标为 `0.5.0`。
 
+## [0.7.0] - 按任务动态装配（v0.4）
+
+> 版本：npm 0.7.0（对齐功能里程碑 v0.4「按任务动态装配」；在 0.6.0 productized 基线上新增）。
+> 更新：路径 A `bash myco-install-0.7.0.sh` / `myco upgrade`；路径 B DSH 插件管理在线更新（git 依赖）。
+
+### 新增
+- **数据面**（`lib/core/assemble.js` + `lib/core/taskctx.js`，纯 Node 零依赖，CLI/插件共用）：
+  - 任务上下文归一化：目标文本 / 用户 / 环境 + 分词（ASCII 词 + CJK 串二元组；CJK 二元组仅用于短字段召回，全文用整段避免逐字噪音）。
+  - 两层匹配：**profile 精确匹配**（用户/环境/目标逐维命中）→ **知识包子集软匹配**（whenToUse 语义×5 > tag×3 > 文件名×2 > 全文×1）；命中为空回退默认（全量包不裁剪）。
+  - 产出 `toolMask`（保留检索/装配基础工具、列出被裁包）与可复现 `lockfile`（写入 `dataDir/assemble.lock.json`）。
+  - CLI：`myco assemble <目标>`、`myco assemble-status`；HTTP API：`/myco/api/assemble?goal=`、`/myco/api/assemble/last`。
+- **工具面**（`lib/tools.js`）：新增 `myco_assemble` agent 工具（收 goal 返回装配子集 + 推荐文档 + 工具掩码）；`applyAgentTools` 提供 agent 作用域装配器（注入 scoped 检索 + 可选 `restrict`），`createScopedFindTool` 生成限定到装配子集的检索工具；`registerAgentAssembly` 可把装配接进 `agent/created` 生命周期（**opt-in**：`config.assemble.auto`）。
+- **scoped 检索**（`lib/core/myco.js`）：`find(query, {packageIds})` 支持限定知识包子集；新增 `findScoped(query, packageIds)` 供 agent 作用域注入。
+- **控制台**（`lib/client.js`）：设置页新增「按任务动态装配」区（输入目标 → 展示命中包子集/推荐文档/工具掩码，可回显上次装配 lockfile）。
+- 单测：`test/assemble.test.js`（分词 / profile 匹配 / 软匹配 / 回退 / lockfile）、`test/agent-tools.test.js`（findScoped / scoped 检索工具 / applyAgentTools）；宿主平面验证扩展到 5 工具 + assemble API（`scripts/host-check.mjs`）。
+
+> 已知（待实机核验）：DSH agent 作用域 `ctx.tools.restrict/register/presentAs/guard` 的真实签名与行为需在真实 DSH agent 运行时确认（设计文档 §2/§7）；`agent/created` 时目标往往尚未就绪，自动「目标→装配→掩码」需真实 agent 循环核验。
+
+---
+
 ## [0.6.0] - 聚合遥测 + 自动更新
 
 > 版本对齐：0.6.0（productized 基线在 0.5.0 基础上追加 telemetry + 自动更新）。

@@ -29,6 +29,8 @@ myco <命令> [参数...]
 | --- | --- |
 | `myco profile list` | 列出组合配置 |
 | `myco profile use <name>` | 激活组合配置 |
+| `myco assemble <目标>` | 按任务动态装配：匹配 profile + 知识包子集 + 工具掩码，写 `assemble.lock.json` |
+| `myco assemble-status` | 查看最近一次装配的 lockfile（打分可复现） |
 
 ## 生命周期
 

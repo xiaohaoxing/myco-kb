@@ -18,7 +18,7 @@
 
 ```bash
 cd /path/to/myco-kb
-# 1) 升版本（当前 0.6.0；加特性 → minor，如 0.7.0）
+# 1) 升版本（当前 0.7.0；加特性 → minor，如 0.8.0）
 node -p "require('./package.json').version"      # 看当前
 #    编辑 package.json 的 "version"（或 npm version minor）
 # 2) 更新 CHANGELOG（新增一节 [0.7.0]，标题对齐 package.json）
