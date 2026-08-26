@@ -55,14 +55,43 @@ myco telemetry off             # 关闭（取消勾选亦可）
 myco telemetry now             # 立即上报一次（校验）
 ```
 
-配置存 `~/.myco/config.json` 的 `telemetry`：
+配置存 `~/.myco/config.json` 的 `telemetry`（插件默认值见 `cordis.patch.yml`，可被覆盖）：
 
 ```json
-{ "telemetry": { "enabled": true, "url": "https://...", "intervalHours": 24, "lastSentAt": "..." } }
+{ "telemetry": { "enabled": true, "provider": "posthog", "url": "https://us.i.posthog.com/i/v0/e/", "apiKey": "", "intervalHours": 24, "lastSentAt": "..." } }
 ```
 
+- **provider**：`generic`（POST 原始聚合 JSON）或 `posthog`（PostHog 单事件格式）。
+- **apiKey**：PostHog 项目 token（`phc_...`）；优先 `telemetry.apiKey`，或环境变量 `POSTHOG_API_KEY`。
 - `MYCO_TELEMETRY=0`：整机禁用（优先级高于 enabled）。
 - daemon（`myco daemon` 或插件宿主平面）每周期调用 `telemetryTick()`，按 `intervalHours` 与 `lastSentAt` 决定是否发送；发送失败不阻塞定时循环。
+
+## PostHog 集成（provider=posthog）
+
+按 PostHog 云端摄入端点发送**单事件**：
+
+```bash
+myco telemetry set https://us.i.posthog.com/i/v0/e/   # 或 EU: https://eu.i.posthog.com/i/v0/e/
+# myco telemetry 的 url 由插件默认（cordis.patch.yml）给出，通常无需再 set
+```
+
+事件体（`POST {url}`，`Content-Type: application/json`）：
+
+```json
+{
+  "api_key": "phc_...",
+  "event": "myco_kb_heartbeat",
+  "distinct_id": "<随机 UUID>",
+  "timestamp": "<ISO>",
+  "properties": { "version": "0.5.0", "platform": "darwin", "counts_packages": 3, "...": "..." }
+}
+```
+
+- `api_key` = PostHog **项目 token（`phc_`，公开的摄入 key）**——它本来就会出现在前端代码里，**不是机密**；但若担心公库可见，可用 `POSTHOG_API_KEY` 环境变量或本地 profile 覆盖，不要写进公开 `cordis.patch.yml`。
+- `distinct_id` = 匿名随机 UUID（≤200 字符），PostHog 会据此建立**匿名 person 记录**（只关联随机 id，不关联任何个人/组织/内容）。
+- `properties` 全为聚合计数/版本/平台/状态，**无任何知识内容、包 id/名、文件名、IP**。
+- PostHog 公开 dashboard 可直接当作**公开状态页**（脱敏展示聚合 total，不点名组织）。
+- 建议在 PostHog 项目里**关闭自采集/录制**（我们只 server 端 POST 这一个事件，本身不触发录制）。
 
 ## 合规要点
 

@@ -100,3 +100,46 @@ test('telemetryTick：按间隔门控（上次刚发送则跳过, 超出间隔�
     globalThis.fetch = origFetch
   }
 })
+
+test('telemetryPayload：provider=posthog 生成 PostHog 事件；缺 apiKey 报错', async () => {
+  const { myco } = await makeMyco()
+  // 默认 generic：返回原始聚合 JSON（含 schema）
+  const gen = myco.telemetryPayload()
+  assert.equal(gen.ok, true)
+  assert.ok(gen.payload.schema)
+  // 切到 posthog 但无 apiKey → 报错
+  myco.setTelemetry({ provider: 'posthog' })
+  const noKey = myco.telemetryPayload()
+  assert.equal(noKey.ok, false)
+  assert.match(noKey.reason, /apiKey/)
+  // 有 apiKey → PostHog 单事件格式
+  myco.setTelemetry({ apiKey: 'phc_test' })
+  const eh = myco.telemetryPayload()
+  assert.equal(eh.ok, true)
+  assert.equal(eh.payload.api_key, 'phc_test')
+  assert.equal(eh.payload.event, 'myco_kb_heartbeat')
+  assert.match(eh.payload.distinct_id, /^[0-9a-f-]{36}$/)
+  assert.ok(eh.payload.properties)
+  assert.equal(typeof eh.payload.properties.counts_packages, 'number')
+  const text = JSON.stringify(eh.payload)
+  assert.ok(!text.includes('packageId'))
+})
+
+test('sendTelemetry：provider=posthog 时 POST PostHog 事件体', async () => {
+  const { myco } = await makeMyco()
+  myco.setTelemetry({ enabled: true, provider: 'posthog', apiKey: 'phc_test', url: 'https://us.i.posthog.com/i/v0/e/', intervalHours: 0 })
+  let posted = null
+  const origFetch = globalThis.fetch
+  globalThis.fetch = async (url, opts) => { posted = { url, body: opts.body }; return { ok: true, status: 200 } }
+  try {
+    const r = await myco.sendTelemetry()
+    assert.equal(r.ok, true)
+    assert.equal(posted.url, 'https://us.i.posthog.com/i/v0/e/')
+    const b = JSON.parse(posted.body)
+    assert.equal(b.api_key, 'phc_test')
+    assert.equal(b.event, 'myco_kb_heartbeat')
+    assert.ok(b.properties.counts_packages !== undefined)
+  } finally {
+    globalThis.fetch = origFetch
+  }
+})

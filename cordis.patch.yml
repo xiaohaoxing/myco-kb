@@ -10,9 +10,13 @@
         maintenanceIntervalHours: 6
 
         # 聚合遥测（opt-in）：用户勾选「统计共享」才上报，仅匿名聚合统计。
-        # url = 开发者统计端点（公开展示页/托管分析）。留空即即使勾选也不上报（设置页会提示「上报端点未配置」）。
+        # provider=posthog：按 PostHog 单事件格式 POST {api_key,event,distinct_id,properties,timestamp}。
+        # url = PostHog 云端摄入端点（US=us.i.posthog.com，EU=eu.i.posthog.com，自建按你的域名）+ /i/v0/e/。
+        # apiKey = PostHog 项目 token（phc_...，公开的摄入 key）。也可改用环境变量 POSTHOG_API_KEY 减少入库。
         telemetry:
-          url: ''
+          provider: posthog
+          url: https://us.i.posthog.com/i/v0/e/
+          apiKey: phc_tanIaGBccHOshFxiOhTeERXgDumVfdB3LYInVpuBiqJ
           intervalHours: 24
 
         # 设置页「相关链接」区（三个链接；留空则该项不显示）
