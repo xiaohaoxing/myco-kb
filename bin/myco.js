@@ -40,7 +40,11 @@ function usage() {
   myco webhook set <url>    设置 webhook url（留空 = 清除）
   myco webhook show         显示当前配置
   myco webhook test         发送测试消息
-  myco daemon               前台运行守护（watcher + 定时维护 + 云同步）
+  myco telemetry status     显示遥测配置与本次将上报的聚合指标（匿名，不含任何知识内容）
+  myco telemetry set <url>  设置上报 url（未配置 url 不发送；设置后才定时上报）
+  myco telemetry on/off     启用/关闭聚合遥测（MYCO_TELEMETRY=0 整机禁用）
+  myco telemetry now        立即上报一次（配置校验）
+  myco daemon               前台运行守护（watcher + 定时维护 + 云同步 + 定时遥测）
   myco install-skills       安装 skills/ 到 ~/.agents/skills/
 
 环境变量:
@@ -300,6 +304,37 @@ async function main() {
       if (sub === 'test') {
         const r = await myco.sendWebhook('【MyCo-KB】测试消息：webhook 配置正常')
         console.log(r.ok ? `✓ 发送成功（HTTP ${r.status}）` : `✗ 发送失败：${r.reason ?? r.status}`)
+        return
+      }
+      throw new Error(`未知子命令: ${sub}`)
+    }
+    case 'telemetry': {
+      const sub = args[0]
+      if (sub === 'on') {
+        myco.setTelemetry({ enabled: true })
+        console.log('✓ telemetry 已启用（需配置 url 才发送：`myco telemetry set <url>`）')
+        return
+      }
+      if (sub === 'off') {
+        myco.setTelemetry({ enabled: false })
+        console.log('✓ telemetry 已关闭（不再上报；`MYCO_TELEMETRY=0` 可整机禁用）')
+        return
+      }
+      if (sub === 'set') {
+        myco.setTelemetry({ url: args[1] ?? '' })
+        console.log(args[1] ? '✓ 已设置 telemetry url（到达间隔后自动定时上报）' : '✓ 已清除 telemetry url（暂停上报）')
+        return
+      }
+      if (sub === 'now') {
+        const r = await myco.sendTelemetry()
+        console.log(r.ok ? `✓ 已上报（HTTP ${r.status}）` : `✗ ${r.reason ?? r.status}`)
+        return
+      }
+      if (sub === 'status' || sub === undefined) {
+        const t = myco.getTelemetry()
+        const c = myco.collectTelemetry()
+        console.log(`telemetry enabled: ${t.enabled}  url: ${t.url || '(未配置，不发送)'}  间隔: ${t.intervalHours}h  上次发送: ${t.lastSentAt ?? '未发送'}`)
+        console.log(`本次将上报（匿名聚合，不含任何知识内容）: 包${c.counts.packages} 文档${c.counts.documents} tag${c.counts.tags} 挂载${c.counts.mounts} 事件${c.counts.events} stale${c.counts.stale} 平台${c.platform}/${c.arch} node${c.nodeVersion}`)
         return
       }
       throw new Error(`未知子命令: ${sub}`)

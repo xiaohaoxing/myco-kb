@@ -6,12 +6,12 @@
         <h1 class="hero-name">MyCo-KB</h1>
         <p class="hero-tagline">面向 DeepSeek Harness 的知识库管理系统。知识包统一挂载、组合配置按需激活、生命周期自动演进、跨包检索即问即答、云端 git 同步、契约驱动的知识更新流 —— 让知识像菌丝网络一样生长与传播。</p>
         <div class="hero-actions">
-          <a class="myco-btn primary" href="/docs/quickstart">
+          <a class="myco-btn primary" :href="withBase('/docs/quickstart')">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
             快速开始
           </a>
-          <a class="myco-btn ghost" href="/features">产品特性</a>
-          <a class="myco-btn ghost" href="/design/overview">系统设计</a>
+          <a class="myco-btn ghost" :href="withBase('/features')">产品特性</a>
+          <a class="myco-btn ghost" :href="withBase('/design/overview')">系统设计</a>
         </div>
         <div class="hero-pills">
           <span class="pill">MIT License</span>
@@ -36,6 +36,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { withBase } from 'vitepress'
 
 const canvas = ref(null)
 

@@ -119,6 +119,7 @@ npm run build    # 静态产物 .vitepress/dist/，可部署到任意静态托�
 - **制品安装/升级/回滚**：`bash scripts/install-release.sh install dist/dsh-myco-kb-<version>.tgz [profile]`（替代开发用符号链接 `install-profile.sh`）；支持 `rollback` / `list`。默认 profile `~/.dsh/profiles/web`。
 - **`myco` 命令自动可用**：`install-release.sh` 会生成 `~/.local/bin/myco` 启动器（用 DSH 工具链 node 指向当前 profile 的插件 CLI，跟随版本符号链接）。若该目录不在 PATH，默认在 shell rc（`~/.zshrc` 优先）写入带标记的 `export PATH` 块（幂等、可逆）；设 `MYCO_NO_PATH=1` 可跳过（仅生成启动器并打印提示）。
 - **制品需包含 `cordis.patch.yml`**（插件 bundle 入口）——`files` 字段已包含并打包校验。
+- **聚合遥测（可选、默认需配置 url 才发送）**：daemon 定时上报严格匿名的聚合统计（版本/平台/包数/文档数/tag 数/运行状态），**不含任何知识内容、包 id/名、文件名、IP**；`myco telemetry set <url>` 才发送，`myco telemetry off` 或 `MYCO_TELEMETRY=0` 一键停用。详见 [docs/telemetry.md](/docs/telemetry.md)。
 
 ## 已知边界（实测结论）
 

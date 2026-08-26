@@ -4,6 +4,7 @@ const guides = [
   { text: '快速开始', link: '/docs/quickstart' },
   { text: '安装指导', link: '/docs/installation' },
   { text: 'CLI 命令参考', link: '/docs/cli' },
+  { text: '隐私与遥测', link: '/docs/telemetry' },
   { text: '知识包与挂载', link: '/docs/packages' },
   { text: '组合配置 Profiles', link: '/docs/profiles' },
   { text: '生命周期管理', link: '/docs/lifecycle' },
@@ -30,6 +31,26 @@ export default defineConfig({
   lang: 'zh-CN',
   cleanUrls: true,
   ignoreDeadLinks: true,
+  markdown: {
+    config(md) {
+      // VitePress 不会给 markdown 里的 raw HTML <a href="/..."> 自动加 base，
+      // 而本站在 GitHub Pages 项目页（base=/<repo>/）下，这会让这些链接解析到根路径 → 404。
+      // 这里改写 raw HTML 内部链接，使它们带上 base（已带 base 的、外链、锚点不去动）。
+      const base = process.env.MYCO_BASE || '/'
+      if (!base || base === '/') return
+      const prefix = base.replace(/\/$/, '')
+      const rewrite = (str) => str.replace(/href="\/(?!\/)([^"#][^"]*)"/gi, (m, path) => {
+        if (path.startsWith(prefix.slice(1) + '/')) return m
+        return `href="${prefix}/${path}"`
+      })
+      const rb = md.renderer.rules.html_block
+      md.renderer.rules.html_block = (tokens, idx, options, env, self) =>
+        rewrite(rb ? rb(tokens, idx, options, env, self) : self.renderToken(tokens, idx, options))
+      const ri = md.renderer.rules.html_inline
+      md.renderer.rules.html_inline = (tokens, idx, options, env, self) =>
+        rewrite(ri ? ri(tokens, idx, options, env, self) : self.renderToken(tokens, idx, options))
+    },
+  },
   head: [
     ['meta', { name: 'theme-color', content: '#0f766e' }],
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo.svg' }],

@@ -8,3 +8,15 @@
       config:
         # 定时维护间隔（小时）：索引重建 → 生命周期扫描 → 云端 git 同步
         maintenanceIntervalHours: 6
+
+        # 聚合遥测（opt-in）：用户勾选「统计共享」才上报，仅匿名聚合统计。
+        # url = 开发者统计端点（公开展示页/托管分析）。留空即即使勾选也不上报（设置页会提示「上报端点未配置」）。
+        telemetry:
+          url: ''
+          intervalHours: 24
+
+        # 设置页「相关链接」区（三个链接；留空则该项不显示）
+        links:
+          source: https://github.com/xiaohaoxing/myco-kb
+          docs: https://xiaohaoxing.github.io/myco-kb/
+          site: https://github.com/xiaohaoxing   # TODO: 替换为你的个人站点
