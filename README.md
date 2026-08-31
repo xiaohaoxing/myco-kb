@@ -30,7 +30,7 @@ myco cloud add <name> <url>        # 注册云端知识根（git 仓库）
 myco cloud sync [name]             # 同步云端包（clone/pull/push）
 ```
 
-数据目录默认随运行位置走：CLI 默认 `join(cwd, '.myco')`（工作区相对，可在会话工作区内直接运行），优先级为显式 `dataDir` > 环境变量 `MYCO_DATA` > 该默认值；DSH 插件默认回退 `~/.myco`（宿主 `cwd` 非工作区），需工作区化部署时用 `dataDir` 或 `MYCO_DATA` 指定。**默认知识库路径 `~/.myco-kb`**（`myco init` 创建并挂载，可用 Obsidian 打开；也可手动改挂载到已有 Obsidian 知识库路径）。
+数据目录优先级：显式 `dataDir` > 环境变量 `MYCO_DATA` > 默认。默认值：普通环境回退 `~/.myco`（与 0.7.x 一致，无需任何配置）；仅在 DSH agent 会话环境（检测到 `DSH_SHELL`）下改用 `join(cwd, '.myco')`（工作区相对，使会话内运行的 `myco ...` 落在工作区、绕开 DSH 文件沙箱）。**默认知识库路径 `~/.myco-kb`**（`myco init` 创建并挂载，可用 Obsidian 打开；也可手动改挂载到已有 Obsidian 知识库路径）。
 
 ## 目录结构
 

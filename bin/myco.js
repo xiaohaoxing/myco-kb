@@ -8,8 +8,8 @@ import { Myco } from '../lib/core/myco.js'
 import { resolveDataDir } from '../lib/core/datadir.js'
 import { latestRelease, isNewer, findInstallerAsset, findShaAsset, download, checkSha256 } from '../lib/upgrade.js'
 
-// CLI 默认工作区相对：以 cwd 为根（agent 在会话工作区运行 → 数据落进工作区，绕开沙箱）
-const dataDir = resolveDataDir(undefined, { workspaceRelative: true })
+// CLI 数据目录：显式 dataDir > MYCO_DATA > 默认（普通环境 ~/.myco；DSH agent 环境工作区相对）
+const dataDir = resolveDataDir()
 const [cmd, ...args] = process.argv.slice(2)
 
 // 当前已安装版本：优先取 DSH profile 版本化安装的 .active，否则回退到本包版本

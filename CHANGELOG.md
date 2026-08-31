@@ -4,6 +4,19 @@ MyCo-KB 的版本遵循语义化版本（semver）。本文记录每个 npm 发�
 
 > **版本与里程碑的对应**：项目内的 v0.x 功能里程碑（roadmap）与 npm 包版本（semver）历史上不同步——功能里程碑在 `0.1.0` 下持续累积交付。**自 `0.5.0` 起对齐**：npm 包版本 = 该发布所包含的最终功能里程碑。首个产品化交付版本即把包含到 v0.5 的全部功能，统一标为 `0.5.0`。
 
+## [0.8.1] - 数据目录默认收敛（向后兼容）
+
+> 版本：0.8.1（patch：把 0.8.0 的 CLI cwd-relative 默认改回「普通环境 `~/.myco`，仅 DSH agent 环境工作区相对」，避免普通用户换目录看到不同（空）数据；其余不变）。
+
+### 变更
+- **`lib/core/datadir.js`**：默认逻辑改为——普通环境回退 `~/.myco`（与 0.7.x 一致、零配置）；仅当检测到 DSH agent 会话环境（`process.env.DSH_SHELL`）才用 `join(process.cwd(), '.myco')`（工作区相对，绕开 DSH 文件沙箱对工作区外写入的拦截）。
+- **`bin/myco.js`**：同步该默认（不再强制 cwd-relative）。
+- 新增 `test/datadir.test.js`（显式 `dataDir` > `MYCO_DATA` > DSH_SHELL 工作区相对 > `~/.myco`）。
+
+> 说明：0.8.0（CLI 一律 cwd-relative）对「在项目里跑 `myco`」最方便，但对「`myco init` 在一处、`myco status` 在另一处」的普通用户会看到不同（空）数据；本版收敛，普通用户无需任何配置。
+
+---
+
 ## [0.8.0] - 数据目录工作区化 + 呈现契约修正
 
 > 版本：0.8.0（minor：数据目录默认改工作区相对、插件支持 `MYCO_DATA`/`dataDir` 覆盖、`presentCall` 呈现契约修正；含若干应对 DSH 文件沙箱的部署适配）。
