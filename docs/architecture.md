@@ -4,7 +4,7 @@
 
 ## 运行时形态
 
-1. **CLI（`myco`）**：纯 Node，零依赖，复用 `lib/core/*`，数据目录 `~/.myco`（`MYCO_DATA` 覆盖）。
+1. **CLI（`myco`）**：纯 Node，零依赖，复用 `lib/core/*`，数据目录默认 `join(cwd, '.myco')`（工作区相对；`MYCO_DATA` 覆盖，优先级 > 默认）。
 2. **DSH 插件（`@dsh/myco-kb`）**：Cordis 插件，宿主平面运行；**标准 bundle 装载**——插件自带 `cordis.patch.yml`（自声明 entry，id+name+config），package.json 声明 `dsh.bundle.patch` 指向它，profile 经 `dsh.profile.bundles` 装载（2026-08-20 从"手动 insert"改为标准形态：手动 insert 会被插件管理页判为"不是 DSH 插件"且 client 端不装载）。
    - 服务端 `lib/index.js`：`new MycoRemoteService(ctx, myco)`（TypertRemoteService 构造器自动注册 `ctx.myco` 并经 Typert Gateway 暴露为 client 的 `remote.myco`）；`registerTools` 注册 agent 工具；`ctx.effect` 托管 daemon。
    - 客户端 `lib/client.js`：控制台面板，挂在插件管理页 `settings.plugins.tab` slot（与 dsh-client-ui-settings-plugin-inventory 同槽），四个区：本地状态 / 远程库 / 组合配置 / 工作区矩阵。

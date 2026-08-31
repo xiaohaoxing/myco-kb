@@ -4,6 +4,25 @@ MyCo-KB 的版本遵循语义化版本（semver）。本文记录每个 npm 发�
 
 > **版本与里程碑的对应**：项目内的 v0.x 功能里程碑（roadmap）与 npm 包版本（semver）历史上不同步——功能里程碑在 `0.1.0` 下持续累积交付。**自 `0.5.0` 起对齐**：npm 包版本 = 该发布所包含的最终功能里程碑。首个产品化交付版本即把包含到 v0.5 的全部功能，统一标为 `0.5.0`。
 
+## [0.8.0] - 数据目录工作区化 + 呈现契约修正
+
+> 版本：0.8.0（minor：数据目录默认改工作区相对、插件支持 `MYCO_DATA`/`dataDir` 覆盖、`presentCall` 呈现契约修正；含若干应对 DSH 文件沙箱的部署适配）。
+
+### 变更
+- **数据目录默认改为工作区相对**（`bin/myco.js`）：`dataDir` 解析走新 `lib/core/datadir.js`；CLI 默认 `join(process.cwd(), '.myco')`——在会话工作区内运行 `myco ...` 时，数据落进工作区，从而绕开 DSH 文件沙箱对工作区外写入的拦截（此前 `~/.myco` 位于工作区外，沙箱内 `myco status/sweep/index/...` 报 `EPERM`）。
+- **插件支持 `dataDir`/`MYCO_DATA` 覆盖**（`lib/index.js`）：`apply()` 改为 `resolveDataDir(config.dataDir)`（优先级：显式 `dataDir` > `MYCO_DATA` > 回退 `~/.myco`）。宿主插件默认仍回退 `~/.myco`（宿主 `cwd` 非工作区，避免把数据写进 app bundle），需工作区部署时用 `dataDir` 或 `MYCO_DATA` 显式指定。
+- **`presentCall` 呈现契约修正**（`lib/tools.js`）：`present()` 返回的调用视图补上 `card: 'generic'` 字段（dsh-tools render-intent 契约要求），`kind`/`detail` 仅在存在时输出；修复缺 `card` 被宿主 `viewFor` 当未知卡型回退的降级。
+- **`.gitignore`**：新增 `.myco/`（工作区内的数据目录，防止把 `config.json`（含 webhook/遥测）与嵌套 `cloud/*` git 仓库提交进仓库）。
+
+### 部署提示（本机工作区化）
+- 迁移：`cp -R ~/.myco/. <workspace>/.myco/`，并把 `.myco/config.json` 的 `cloudRoots[*].path` 改到新位置。
+- CLI（agent 在会话内运行）默认即取 `<workspace>/.myco`（cwd 相对）。
+- 要让 DSH 宿主插件也用同一数据目录：启动 DSH 前 `export MYCO_DATA=<workspace>/.myco`，或在 profile 的 `cordis.patch.yml` 以 `@dsh/myco-kb` 的 `config.dataDir` 指定（注意同名 id 叠加，勿与 bundle patch 重复）。
+
+> 已知（待实机核验）：同名 id 在 profile `cordis.patch.yml` 覆盖 bundle patch 是否触发 loader 「duplicate loader entry id」需在真实 DSH 启动时确认；建议优先用 `MYCO_DATA` 环境变量。
+
+---
+
 ## [0.7.1] - 公开内容脱敏
 
 > 版本：0.7.1（patch：清理公开仓库/官网/制品中的内部与敏感信息；功能与 0.7.0 一致）。

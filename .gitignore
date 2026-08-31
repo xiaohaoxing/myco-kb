@@ -1,6 +1,7 @@
 node_modules/
 data/
 dist/
+.myco/
 .pnpm-store/
 *.log
 .DS_Store
