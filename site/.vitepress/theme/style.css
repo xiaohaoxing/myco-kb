@@ -554,6 +554,14 @@ body {
 .dark .rm-tag.done { background: rgba(34, 197, 94, 0.16); color: #4ade80; }
 .rm-tag.next { background: #fef9c3; color: #a16207; }
 .dark .rm-tag.next { background: rgba(250, 204, 21, 0.14); color: #facc15; }
+/* 存档条目：未单独发版 / 无制品下载，仅只读展示 */
+.rm-tag.archive { background: var(--vp-c-bg-soft); color: var(--vp-c-text-3); border: 1px solid var(--vp-c-border); }
+.roadmap .rm-item.archive::before { background: var(--vp-c-bg-elv); border-color: var(--vp-c-text-3); }
+.roadmap .rm-item.archive h3 { color: var(--vp-c-text-2); }
+/* 条目底部：下载链接 / 只读说明 */
+.roadmap .rm-links { margin: 10px 0 0; font-size: 13px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.roadmap .rm-links a { font-weight: 600; }
+.roadmap .rm-links .rm-readonly { color: var(--vp-c-text-3); font-style: normal; }
 
 /* 信息卡（文档页用） */
 .tip-card {
