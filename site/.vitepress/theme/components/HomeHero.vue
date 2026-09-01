@@ -2,33 +2,17 @@
   <section class="home-hero">
     <div class="hero-inner">
       <div class="hero-left">
-        <span class="home-badge"><span class="dot"></span>&nbsp;DeepSeek Harness 插件 · 当前版本 <b>v0.5.3</b></span>
+        <span class="home-badge"><span class="dot"></span>&nbsp;DeepSeek Harness 插件 · <b>v{{ theme.mycoVersion }}</b></span>
         <h1 class="hero-name">MyCo-KB</h1>
-        <p class="hero-tagline">面向 DeepSeek Harness 的知识库管理系统。知识包统一挂载、组合配置按需激活、生命周期自动演进、跨包检索即问即答、云端 git 同步、契约驱动的知识更新流 —— 让知识像菌丝网络一样生长与传播。</p>
+        <p class="hero-tagline">把散落的笔记与文档，变成一个可挂载、可检索、会随时间演进的知识库 —— 你和你的 agent 共用同一份。</p>
         <div class="hero-actions">
-          <a class="myco-btn primary" :href="withBase('/docs/quickstart')">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
-            快速开始
-          </a>
+          <a class="myco-btn primary" :href="withBase('/docs/quickstart')">快速开始</a>
           <a class="myco-btn ghost" :href="withBase('/features')">产品特性</a>
-          <a class="myco-btn ghost" :href="withBase('/design/overview')">系统设计</a>
-        </div>
-        <div class="hero-pills">
-          <span class="pill">MIT License</span>
-          <span class="pill">零运行时依赖核心</span>
-          <span class="pill">Cordis 插件形态</span>
         </div>
       </div>
 
       <div class="hero-right">
         <canvas ref="canvas" class="net-canvas" role="img" aria-label="MyCo-KB 知识网络演示：知识包节点、契约光环、传播脉冲、stale 与 agent 起草循环"></canvas>
-        <div class="net-legend">
-          <span class="lg"><i class="dot pkg"></i>知识包</span>
-          <span class="lg"><i class="dot ctr"></i>契约（光环）</span>
-          <span class="lg"><i class="dot pulse"></i>传播脉冲</span>
-          <span class="lg"><i class="dot stale"></i>stale</span>
-          <span class="lg"><i class="dot agent"></i>agent 起草</span>
-        </div>
       </div>
     </div>
   </section>
@@ -36,7 +20,9 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { withBase } from 'vitepress'
+import { withBase, useData } from 'vitepress'
+
+const { theme } = useData()
 
 const canvas = ref(null)
 

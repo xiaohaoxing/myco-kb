@@ -1,4 +1,8 @@
 import { defineConfig } from 'vitepress'
+import { readFileSync } from 'node:fs'
+
+// 版本号从仓库根 package.json 读取：站点里不再手写版本号，避免发版后过期
+const version = JSON.parse(readFileSync(new URL('../../package.json', import.meta.url), 'utf8')).version
 
 const guides = [
   { text: '快速开始', link: '/docs/quickstart' },
@@ -59,6 +63,7 @@ export default defineConfig({
   themeConfig: {
     logo: '/logo.svg',
     siteTitle: 'MyCo-KB',
+    mycoVersion: version,
     search: {
       provider: 'local',
       options: {

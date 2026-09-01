@@ -196,11 +196,6 @@ body {
   gap: 12px;
   margin-bottom: 26px;
 }
-.hero-pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
 
 /* 网络演示画布 */
 .hero-right { position: relative; }
@@ -216,22 +211,6 @@ body {
   box-shadow: var(--myco-shadow-md);
 }
 @media (max-width: 860px) { .net-canvas { height: 320px; } }
-.net-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 14px;
-  justify-content: center;
-  margin-top: 12px;
-  font-size: 12px;
-  color: var(--vp-c-text-2);
-}
-.net-legend .lg { display: inline-flex; align-items: center; gap: 6px; }
-.net-legend .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex: none; }
-.net-legend .pkg { background: var(--vp-c-brand-1); }
-.net-legend .ctr { background: transparent; border: 2px solid var(--vp-c-brand-2); }
-.net-legend .pulse { background: var(--vp-c-brand-2); width: 14px; border-radius: 4px; }
-.net-legend .stale { background: #d97706; }
-.net-legend .agent { background: #7c3aed; }
 
 /* ---------- 终端演示 ---------- */
 .term {
@@ -335,17 +314,6 @@ body {
 .fcard .f-icon svg { width: 22px; height: 22px; }
 .fcard h3 { font-size: 16px; font-weight: 650; margin: 0 0 8px; color: var(--vp-c-text-1); }
 .fcard p { font-size: 13.5px; line-height: 1.65; color: var(--vp-c-text-2); margin: 0; }
-.fcard .f-tag {
-  display: inline-block;
-  margin-top: 12px;
-  font-size: 11.5px;
-  font-weight: 600;
-  padding: 2px 9px;
-  border-radius: 999px;
-  color: var(--vp-c-brand-1);
-  background: var(--vp-c-brand-soft);
-  letter-spacing: 0.03em;
-}
 
 /* 三步工作流 */
 .steps {
@@ -383,32 +351,6 @@ body {
   padding: 1px 6px;
   font-size: 12.5px;
 }
-
-/* 统计条 */
-.stats-band {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1px;
-  border: 1px solid var(--vp-c-border);
-  border-radius: 14px;
-  overflow: hidden;
-  background: var(--vp-c-border);
-  box-shadow: var(--myco-shadow-sm);
-}
-@media (max-width: 640px) { .stats-band { grid-template-columns: repeat(2, 1fr); } }
-.stat {
-  background: var(--vp-c-bg-elv);
-  padding: 24px 18px;
-  text-align: center;
-}
-.stat .n {
-  font-size: 30px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  color: var(--vp-c-brand-1);
-  letter-spacing: -0.01em;
-}
-.stat .l { font-size: 13px; color: var(--vp-c-text-2); margin-top: 4px; }
 
 /* 文档入口卡片 */
 .doc-cards {
@@ -498,26 +440,6 @@ body {
 }
 .myco-btn.ghost:hover { border-color: var(--vp-c-brand-2); color: var(--vp-c-brand-1) !important; }
 
-/* 徽章行（特性页） */
-.badge-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: center;
-  margin-bottom: 8px;
-}
-.pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 12px;
-  border-radius: 999px;
-  font-size: 12.5px;
-  font-weight: 600;
-  background: var(--vp-c-brand-soft);
-  color: var(--vp-c-brand-1);
-  border: 1px solid var(--vp-c-border);
-}
 
 /* 里程碑（路线图） */
 .roadmap {
