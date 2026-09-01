@@ -57,4 +57,4 @@ A: 任意 Markdown 页内的 Obsidian callout：`> [!myco-contract] id vN` + 内
 
 - 完整命令：[CLI 命令参考](/docs/cli)
 - 工程实现：[系统设计](/design/overview)
-- 路线规划：[路线图](/design/roadmap)
+- 版本变更：[版本发布](/releases)

@@ -21,7 +21,6 @@ const design = [
   { text: '数据模型与检索', link: '/design/datamodel' },
   { text: '知识更新流设计', link: '/design/updateflow' },
   { text: '后台守护', link: '/design/daemon' },
-  { text: '路线图', link: '/design/roadmap' },
 ]
 
 export default defineConfig({
@@ -74,7 +73,7 @@ export default defineConfig({
       { text: '产品特性', link: '/features' },
       { text: '用户文档', link: '/docs/quickstart', activeMatch: '/docs/' },
       { text: '系统设计', link: '/design/overview', activeMatch: '/design/' },
-      { text: '路线图', link: '/design/roadmap' },
+      { text: '版本发布', link: '/releases' },
     ],
     sidebar: {
       '/docs/': [
@@ -85,6 +84,9 @@ export default defineConfig({
       ],
       '/features': [
         { text: '产品特性', items: [{ text: '总览', link: '/features' }] },
+      ],
+      '/releases': [
+        { text: '版本发布', items: [{ text: '发布记录', link: '/releases' }] },
       ],
     },
     socialLinks: [

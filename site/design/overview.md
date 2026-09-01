@@ -52,6 +52,6 @@ MyCo-KB 的设计围绕三个问题展开：
 - [数据模型与检索](/design/datamodel) —— 挂载/包/索引/状态模型、打分、生命周期扫描
 - [知识更新流设计](/design/updateflow) —— 契约、事件、影响分析、存储分层
 - [后台守护](/design/daemon) —— watcher、定时维护、云同步防重入
-- [路线图](/design/roadmap) —— 已交付与规划
+- [版本发布](/releases) —— 各版本已交付能力与后续方向
 
 > 权威设计文档：Obsidian 知识库 `项目/MyCo-KB/MyCo-KB 架构设计.md`；本站在线文档为工程视图。

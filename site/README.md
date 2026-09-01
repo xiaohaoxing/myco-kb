@@ -23,8 +23,9 @@ npm run preview    # 本地预览构建产物（http://localhost:4173）
 ```text
 index.md            主页（Hero + 特性 + 三步工作流 + 统计 + 文档入口）
 features.md         产品特性
+releases.md         版本发布（release notes，按 minor 系列汇总）
 docs/               用户文档（快速开始/CLI/知识包/组合/生命周期/云同步/更新流/技能/开发/FAQ）
-design/             系统设计（总览/架构/数据模型/更新流/守护/路线图）
+design/             系统设计（总览/架构/数据模型/更新流/守护）
 public/logo.svg     菌丝网络 Logo
 ```
 
